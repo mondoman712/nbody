@@ -38,6 +38,12 @@
 	 :initarg :acel
 	 :initform 0)))
 
+(defun sdl-init ()
+  (sdl:window (x *screen-size*)
+	      (y *screen-size*)
+	      :title-caption "nbody")
+  (setf (sdl:frame-rate) 60))
+
 (defun sdl-main-loop ()
   (sdl:with-events ()
     (:quit-event () t)
