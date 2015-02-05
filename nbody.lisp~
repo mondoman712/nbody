@@ -1,0 +1,24 @@
+(ql:quickload "lispbuilder-sdl")
+
+(defclass point )
+
+(defun sdl-main-loop ()
+  (sdl:with-events ()
+    (:quit-event () t)
+    (:key-down-event (:key key)
+      (when (sdl:key= key :sdl-key-q)
+	(sdl:push-quit-event)))
+    
+    (:idle ()
+	   (when *quit* 
+	     (sdl:quit-sdl))
+	   (sdl:clear-display sdl:*black*)
+
+           ;;;;;;;;;;;;;;;; add some code here m8 8/8
+
+	   (sdl:update-display))))
+
+(defun main ()
+  (sdl:with-init ()
+    (sdl-init)
+    (sdl-main-loop)))
