@@ -1,7 +1,8 @@
 (ql:quickload "lispbuilder-sdl")
 
 (defparameter *G* 6.67e-11)
-(defparameter *screen-size* (make-instance 'point :x 640 :y 480))
+;(defparameter *screen-size* (make-instance 'point :x 640 :y 480))
+(defparameter *screen-size* 640)
 (defparameter *quit* 'nil)
 
 (defclass point ()
@@ -39,9 +40,10 @@
 	 :initform 0)))
 
 (defun sdl-init ()
-  (sdl:window (x *screen-size*)
-	      (y *screen-size*)
-	      :title-caption "nbody")
+  (sdl:window ;(x *screen-size*)
+	      ;(y *screen-size*)
+	      640 480
+              :title-caption "nbody")
   (setf (sdl:frame-rate) 60))
 
 (defun sdl-main-loop ()
