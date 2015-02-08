@@ -60,19 +60,18 @@
 
 (defun 2body-acel (body1 body2)
   (split-force
-   (calc-g (mass body)
-	   (dist (pos body) (pos body2)))
-   (ang (pos body2) (pos body))))
+   (calc-g (mass body2)
+	   (dist (pos body1) (pos body2)))
+   (ang (pos body2) (pos body1))))
 
-(defmethod + ((point point1) (point point2))
-  (make-instance 'point 
-		 :x (+ (x point1) (x point2))
-		 :y (+ (y point1) (y point2))))
+(defun point+ (&rest points)
+  (make-instance 'point
+		 :x (apply #'+ (mapcar #'x points))
+		 :y (apply #'+ (mapcar #'y points))))
 
-(defun find-acel (body)
-  (loop for bod in (remove body *bodies*)
-       let x = (
-
+(defun find-acel (body bodies)
+  (loop for bod in (remove body bodies)
+       let x = ()))
 
 (defun update-pos (body)
   "Updates the position of a body using its velocities"
