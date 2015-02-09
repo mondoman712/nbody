@@ -35,7 +35,7 @@
   ;  to SDL coodinates, which are in pixels and relative to the top right corner
   (flet ((new-coord (fn xy)
            (funcall fn (/ (slot-value *screen-size* xy) 2) 
-                       (/ (slot-value pos xy) 468750))))
+                       (slot-value pos xy))))
     ; Calls new-coord on the x and y and creates an SDL point out of them
     (sdl:point :x (new-coord #'+ 'x)
                :y (new-coord #'- 'y))))
@@ -70,7 +70,7 @@
 	 (mapcar
 	  #'(lambda (x)
 	      (split-force (calc-g (mass x) (dist (pos body) (pos x)))
-			   (ang (pos body) (pos x))))
+			   (ang (pos x) (pos body))))
 	  (remove body bodies))))
 
 (defun update-pos (body)
@@ -85,7 +85,7 @@
 (defun draw-body (body)
   "Draws a body to the screen"
   (sdl:draw-filled-circle
-   (pos2pos (pos body)) (/ (mass body) 10) :color sdl:*green*))
+   (pos2pos (pos body)) (round (/ (mass body) 1e12)) :color sdl:*green*))
 
 (defun sdl-init ()
   (sdl:window (x *screen-size*)
@@ -105,6 +105,13 @@
 	     (sdl:quit-sdl))
 	   (sdl:clear-display sdl:*black*)
 
+	   (mapcar #'(lambda (bod)
+		       (sets #'point+ (slot-value bod 'vel)
+			     (find-acel bod *bodies*)))
+		   *bodies*)
+
+	   (mapc #'update-pos *bodies*)
+		
            (mapc #'draw-body *bodies*)
 
 	   (sdl:update-display))))
@@ -113,17 +120,20 @@
   (sdl:with-init ()
     (sdl-init)
     (sdl-main-loop)))
-
-(defparameter *bod1* (make-instance 'body :pos (make-instance 'point :x 0 :y 0)
-			     :vel (make-instance 'point :x 1 :y 1)
-			     :mass 20 
-			     :acel (make-instance 'point :x 0 :y 0)))
+(progn
+(defparameter *bod1* (make-instance 'body
+			     :pos (make-instance 'point :x 100 :y 0)
+			     :vel (make-instance 'point :x 0 :y 2)
+			     :mass 1e12))
 
 (defparameter *bod2* (make-instance 'body 
-			     :pos (make-instance 'point :x 10000000 :y 10000000)
-			     :vel (make-instance 'point :x 1 :y 1)
-			     :mass 200 
-			     :acel (make-instance 'point :x 0 :y 0)))
+			     :pos (make-instance 'point :x 0 :y 0)
+			     :vel (make-instance 'point :x 0 :y 0)
+			     :mass 1e13))
 
-(defparameter *bodies* 
-  (list *bod1* *bod2*))
+;(defparameter *bod3* (make-instance 'body
+;				    :pos (make-instance 'point :x 0 :y -200)
+;				    :vel (make-instance 'point :x -2 :y 0)
+;				    :mass 2.5e12))
+(defparameter *bodies* (list *bod1* *bod2*))
+)
