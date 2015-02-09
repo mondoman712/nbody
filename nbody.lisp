@@ -27,11 +27,7 @@
    (vel :type point
 	:accessor vel
 	:initarg :vel
-	:initform 0)
-   (acel :type point
-	 :accessor acel
-	 :initarg :acel
-	 :initform 0)))
+	:initform 0)))
 
 (defun pos2pos (pos)
   "Converts position relative to centre in km to sdl coordinates"
@@ -53,25 +49,29 @@
   (atan (- (y a) (y b))
         (- (x a) (x b))))
 
+(defun dist (a b)
+  "Calculates the distance between 2 points"
+  (sqrt (+ (expt (abs (- (x a) (x b))) 2)
+	      (expt (abs (- (y a) (y b))) 2))))
+
 (defun split-force (mag ang)
   "Splits the force into its x and y components, returning them as a point"
   (make-instance 'point :x (* mag (cos ang))
                         :y (* mag (sin ang))))
 
-(defun 2body-acel (body1 body2)
-  (split-force
-   (calc-g (mass body2)
-	   (dist (pos body1) (pos body2)))
-   (ang (pos body2) (pos body1))))
-
 (defun point+ (&rest points)
+  "adds the x and y values of the points given"
   (make-instance 'point
 		 :x (apply #'+ (mapcar #'x points))
 		 :y (apply #'+ (mapcar #'y points))))
 
 (defun find-acel (body bodies)
-  (loop for bod in (remove body bodies)
-       let x = ()))
+  (apply #'point+
+	 (mapcar
+	  #'(lambda (x)
+	      (split-force (calc-g (mass x) (dist (pos body) (pos x)))
+			   (ang (pos body) (pos x))))
+	  (remove body bodies))))
 
 (defun update-pos (body)
   "Updates the position of a body using its velocities"
