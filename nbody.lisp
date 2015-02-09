@@ -13,7 +13,7 @@
       :initarg :y
       :initform 0)))
 
-(defparameter *screen-size* (make-instance 'point :x 640 :y 480))
+(defparameter *screen-size* (make-instance 'point :x 1000 :y 700))
 
 (defclass body ()
   ((pos :type point
@@ -29,7 +29,7 @@
 	:initarg :vel
 	:initform 0)))
 
-(defun pos2pos (pos)
+(defun pos2pos (pos centre)
   "Converts position relative to centre in km to sdl coordinates"
   ; Defines a local function to convert a coordinate relative to sun in km
   ;  to SDL coodinates, which are in pixels and relative to the top right corner
@@ -37,8 +37,8 @@
            (funcall fn (/ (slot-value *screen-size* xy) 2) 
                        (slot-value pos xy))))
     ; Calls new-coord on the x and y and creates an SDL point out of them
-    (sdl:point :x (new-coord #'+ 'x)
-               :y (new-coord #'- 'y))))
+    (sdl:point :x (- (new-coord #'+ 'x) (x centre))
+               :y (- (new-coord #'- 'y) (y centre)))))
 
 (defmacro sets (fn a b)
   "like setf, but applies fn to the values"
@@ -82,10 +82,11 @@
   "Calculates the acceleration due to gravity"
   (/ (* *G* M) (* r r)))
 
-(defun draw-body (body)
+(defun draw-body (body centre)
   "Draws a body to the screen"
   (sdl:draw-filled-circle
-   (pos2pos (pos body)) (round (/ (mass body) 1e12)) :color sdl:*green*))
+   (pos2pos (pos body) centre)
+   (+ 1 (ceiling (/ (mass body) 1e12))) :color sdl:*green*))
 
 (defun sdl-init ()
   (sdl:window (x *screen-size*)
@@ -105,6 +106,7 @@
 	     (sdl:quit-sdl))
 	   (sdl:clear-display sdl:*black*)
 
+
 	   (mapcar #'(lambda (bod)
 		       (sets #'point+ (slot-value bod 'vel)
 			     (find-acel bod *bodies*)))
@@ -120,20 +122,24 @@
   (sdl:with-init ()
     (sdl-init)
     (sdl-main-loop)))
-(progn
-(defparameter *bod1* (make-instance 'body
-			     :pos (make-instance 'point :x 100 :y 0)
-			     :vel (make-instance 'point :x 0 :y 2)
-			     :mass 1e12))
+(defparameter *bodies* (list
+			(make-instance 'body
+				       :pos (make-instance 'point :x 200 :y 0)
+				       :vel (make-instance 'point :x 0 :y 2)
+				       :mass 1e11)
 
-(defparameter *bod2* (make-instance 'body 
-			     :pos (make-instance 'point :x 0 :y 0)
-			     :vel (make-instance 'point :x 0 :y 0)
-			     :mass 1e13))
+			(make-instance 'body 
+				       :pos (make-instance 'point :x 0 :y 0)
+				       :vel (make-instance 'point :x 0 :y 0)
+				       :mass 1e13)
 
-;(defparameter *bod3* (make-instance 'body
-;				    :pos (make-instance 'point :x 0 :y -200)
-;				    :vel (make-instance 'point :x -2 :y 0)
-;				    :mass 2.5e12))
-(defparameter *bodies* (list *bod1* *bod2*))
-)
+			
+			(make-instance 'body
+				       :pos (make-instance 'point :x 0 :y -150)
+				       :vel (make-instance 'point :x 2 :y 0)
+				       :mass 0.5e11)
+			(make-instance 'body
+				       :pos (make-instance 'point :x 300 :y 0)
+				       :vel (make-instance 'point :x 0 :y 1)
+				       :mass 1e11)
+))
