@@ -111,11 +111,7 @@
     (:key-down-event
      (:key key)
      (when (sdl:key= key :sdl-key-q)
-       (sdl:push-quit-event))
-     (when (sdl:key= key :sdl-key-space)
-       (loop named john
-	    (if (sdl:key= key :sdl-key-space)
-		(return-from john t)))))
+       (sdl:push-quit-event)))
     
     (:idle ()
 	   (when *quit* 
@@ -131,6 +127,16 @@
 	   (let ((centre (centre-of-mass *bodies*)))
 	     (mapc #'(lambda (x) (draw-body x centre)) *bodies*))
 
+	   (sdl:draw-pixel (pos2pos
+			    (make-instance 'point :x 0 :y 0)
+			    (centre-of-mass *bodies*))
+			   :color sdl:*red*)
+
+	   (sdl:draw-pixel (pos2pos
+			    (make-instance 'point :x 0 :y 0)
+			    (make-instance 'point :x 0 :y 0))
+			   :color sdl:*red*)
+
 	   (sdl:update-display))))
 
 (defun main ()
@@ -140,19 +146,27 @@
 
 (defparameter *bodies* (list
 			(make-instance 'body
-				       :pos (make-instance 'point :x 200 :y 0)
+				       :pos (make-instance 'point :x -200 :y 0)
 				       :vel (make-instance 'point :x 0 :y 2)
 				       :mass 1e12)
 			(make-instance 'body 
-				       :pos (make-instance 'point :x 0 :y 0)
-				       :vel (make-instance 'point :x 0 :y 0)
-				       :mass 1e13)
+				       :pos (make-instance 'point :x 20 :y 0)
+				       :vel (make-instance 'point :x 0 :y 2)
+				       :mass 5e12)
+			(make-instance 'body 
+				       :pos (make-instance 'point :x -20 :y 0)
+				       :vel (make-instance 'point :x 0 :y -2)
+				       :mass 5e12)
 			(make-instance 'body
-				       :pos (make-instance 'point :x 0 :y -150)
+				       :pos (make-instance 'point :x 0 :y -200)
+				       :vel (make-instance 'point :x -2 :y 0)
+				       :mass 1e12)
+			(make-instance 'body
+				       :pos (make-instance 'point :x 200 :y 0)
+				       :vel (make-instance 'point :x 0 :y -2)
+				       :mass 1e12)
+			(make-instance 'body
+				       :pos (make-instance 'point :x 0 :y 200)
 				       :vel (make-instance 'point :x 2 :y 0)
-				       :mass 0.5e12)
-			(make-instance 'body
-				       :pos (make-instance 'point :x 300 :y 0)
-				       :vel (make-instance 'point :x 0 :y 1)
 				       :mass 1e12)
 ))
