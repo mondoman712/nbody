@@ -2,6 +2,7 @@
 
 (defparameter *G* 6.67e-11)
 (defparameter *quit* 'nil)
+(defparameter *scale* 1e12)
 
 (defclass point ()
   ((x :type number
@@ -86,7 +87,24 @@
   "Draws a body to the screen"
   (sdl:draw-filled-circle
    (pos2pos (pos body) centre)
-   (+ 1 (ceiling (/ (mass body) 1e12))) :color sdl:*white*))
+   (+ 1 (ceiling (/ (mass body) *scale*))) :color sdl:*white*))
+
+(defun collidep (bod1 bod2)
+  (if (< (dist (pos bod1) (pos bod2))
+	 (+ (ceiling (/ (mass bod1) *scale*)) (ceiling (/ (mass bod2) *scale*))))
+      't))
+
+(defun handle-collision (bod1 bod2 bodies)
+  (list (remove bod1 (remove bod2 bodies))
+	(make-instance 'body
+		       :pos (make-instance 'point
+					   :x (/ (+ (x (pos bod1))
+						    (x (pos bod2))) 2)
+					   :y (/ (+ (y (pos bod1))
+						    (y (pos bod2))) 2))
+		       :vel (make-instance 'point
+					   :x
+					   :y )
 
 (defun centre-of-mass (bodies)
   "Returns the centre of mass of the list of bodies given"
@@ -146,11 +164,11 @@
 
 (defparameter *bodies* (list
 			(make-instance 'body
-				       :pos (make-instance 'point :x -200 :y 0)
+				       :pos (make-instance 'point :x 20 :y 0)
 				       :vel (make-instance 'point :x 0 :y 2)
 				       :mass 1e12)
 			(make-instance 'body 
-				       :pos (make-instance 'point :x 20 :y 0)
+				       :pos (make-instance 'point :x 21 :y 0)
 				       :vel (make-instance 'point :x 0 :y 2)
 				       :mass 5e12)
 			(make-instance 'body 
