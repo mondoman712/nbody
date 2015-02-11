@@ -14,7 +14,7 @@
       :initarg :y
       :initform 0)))
 
-(defparameter *screen-size* (make-instance 'point :x 1000 :y 700))
+(defparameter *screen-size* (make-instance 'point :x 1600 :y 1000))
 
 (defclass body ()
   ((pos :type point
@@ -90,21 +90,29 @@
    (+ 1 (ceiling (/ (mass body) *scale*))) :color sdl:*white*))
 
 (defun collidep (bod1 bod2)
+  "Checks if the two bodies are colliding"
   (if (< (dist (pos bod1) (pos bod2))
-	 (+ (ceiling (/ (mass bod1) *scale*)) (ceiling (/ (mass bod2) *scale*))))
+	 (+ (ceiling (/ (mass bod1) *scale*))
+	    (ceiling (/ (mass bod2) *scale*))))
       't))
+
+(defun sum-masses (&rest bods)
+  "Returns the sum of the masses of the given bodies"
+  (apply #'+ (mapcar #'mass bods)))
+
+(defun total-momentum (&rest bods)
+  (flet ((mom (bods xy)
+	   (apply #'+
+		  (mapcar #'(lambda (x) (* (mass x) (slot-value (pos x) xy)))
+			  bods))))
+    (make-instance 'point :x (mom bods 'x) :y (mom bods 'y))))
 
 (defun handle-collision (bod1 bod2 bodies)
   (list (remove bod1 (remove bod2 bodies))
 	(make-instance 'body
-		       :pos (make-instance 'point
-					   :x (/ (+ (x (pos bod1))
-						    (x (pos bod2))) 2)
-					   :y (/ (+ (y (pos bod1))
-						    (y (pos bod2))) 2))
-		       :vel (make-instance 'point
-					   :x
-					   :y )
+		       :pos (centre-of-mass bod1 bod2)
+		       :vel (/ (total-momentum bod1 bod2) (sum-masses bod1 bod2))
+		       :mass (sum-masses bod1 bod2))))
 
 (defun centre-of-mass (bodies)
   "Returns the centre of mass of the list of bodies given"
@@ -155,6 +163,11 @@
 			    (make-instance 'point :x 0 :y 0))
 			   :color sdl:*red*)
 
+	   (loop for i in *bodies*
+	      do (loop for j in (remove i *bodies*)
+		    do (if (collidep i j)
+			   (setq *bodies* (handle-collision i j *bodies*)))))
+
 	   (sdl:update-display))))
 
 (defun main ()
@@ -164,11 +177,11 @@
 
 (defparameter *bodies* (list
 			(make-instance 'body
-				       :pos (make-instance 'point :x 20 :y 0)
+				       :pos (make-instance 'point :x -200 :y 0)
 				       :vel (make-instance 'point :x 0 :y 2)
 				       :mass 1e12)
 			(make-instance 'body 
-				       :pos (make-instance 'point :x 21 :y 0)
+				       :pos (make-instance 'point :x 20 :y 0)
 				       :vel (make-instance 'point :x 0 :y 2)
 				       :mass 5e12)
 			(make-instance 'body 
