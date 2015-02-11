@@ -66,6 +66,12 @@
 		 :x (apply #'+ (mapcar #'x points))
 		 :y (apply #'+ (mapcar #'y points))))
 
+(defun point/ (pt1 pt2)
+  "adds the x and y values of the points given"
+  (make-instance 'point
+		 :x (apply #'/ (mapcar #'x points))
+		 :y (apply #'/ (mapcar #'y points))))
+
 (defun find-acel (body bodies)
   (apply #'point+
 	 (mapcar
@@ -110,8 +116,8 @@
 (defun handle-collision (bod1 bod2 bodies)
   (list (remove bod1 (remove bod2 bodies))
 	(make-instance 'body
-		       :pos (centre-of-mass bod1 bod2)
-		       :vel (/ (total-momentum bod1 bod2) (sum-masses bod1 bod2))
+		       :pos (centre-of-mass (list bod1 bod2))
+		       :vel (point/ (total-momentum bod1 bod2) (sum-masses bod1 bod2))
 		       :mass (sum-masses bod1 bod2))))
 
 (defun centre-of-mass (bodies)
@@ -178,7 +184,7 @@
 (defparameter *bodies* (list
 			(make-instance 'body
 				       :pos (make-instance 'point :x -200 :y 0)
-				       :vel (make-instance 'point :x 0 :y 2)
+				       :vel (make-instance 'point :x 0 :y 0)
 				       :mass 1e12)
 			(make-instance 'body 
 				       :pos (make-instance 'point :x 20 :y 0)
