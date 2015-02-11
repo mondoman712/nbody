@@ -38,7 +38,7 @@
                        (slot-value pos xy))))
     ; Calls new-coord on the x and y and creates an SDL point out of them
     (sdl:point :x (- (new-coord #'+ 'x) (x centre))
-               :y (- (new-coord #'- 'y) (y centre)))))
+               :y (+ (new-coord #'- 'y) (y centre)))))
 
 (defmacro sets (fn a b)
   "like setf, but applies fn to the values"
@@ -86,7 +86,18 @@
   "Draws a body to the screen"
   (sdl:draw-filled-circle
    (pos2pos (pos body) centre)
-   (+ 1 (ceiling (/ (mass body) 1e12))) :color sdl:*green*))
+   (+ 1 (ceiling (/ (mass body) 1e12))) :color sdl:*white*))
+
+(defun centre-of-mass (bodies)
+  "Returns the centre of mass of the list of bodies given"
+  (flet ((centre (bods xy)
+	   (/ (apply #'+
+		     (mapcar #'(lambda (x) (* (mass x) (slot-value (pos x) xy)))
+			     bods))
+	      (apply #'+ (mapcar #'mass bods)))))
+    (make-instance 'point
+		   :x (centre bodies 'x)
+		   :y (centre bodies 'y))))
 
 (defun sdl-init ()
   (sdl:window (x *screen-size*)
@@ -97,15 +108,19 @@
 (defun sdl-main-loop ()
   (sdl:with-events ()
     (:quit-event () t)
-    (:key-down-event (:key key)
-      (when (sdl:key= key :sdl-key-q)
-	(sdl:push-quit-event)))
+    (:key-down-event
+     (:key key)
+     (when (sdl:key= key :sdl-key-q)
+       (sdl:push-quit-event))
+     (when (sdl:key= key :sdl-key-space)
+       (loop named john
+	    (if (sdl:key= key :sdl-key-space)
+		(return-from john t)))))
     
     (:idle ()
 	   (when *quit* 
 	     (sdl:quit-sdl))
 	   (sdl:clear-display sdl:*black*)
-
 
 	   (mapcar #'(lambda (bod)
 		       (sets #'point+ (slot-value bod 'vel)
@@ -113,33 +128,31 @@
 		   *bodies*)
 
 	   (mapc #'update-pos *bodies*)
-		
-           (mapc #'draw-body *bodies*)
+	   (let ((centre (centre-of-mass *bodies*)))
+	     (mapc #'(lambda (x) (draw-body x centre)) *bodies*))
 
 	   (sdl:update-display))))
 
 (defun main ()
   (sdl:with-init ()
     (sdl-init)
-    (sdl-main-loop)))
+    (sdl-main-loop))) 
+
 (defparameter *bodies* (list
 			(make-instance 'body
 				       :pos (make-instance 'point :x 200 :y 0)
 				       :vel (make-instance 'point :x 0 :y 2)
-				       :mass 1e11)
-
+				       :mass 1e12)
 			(make-instance 'body 
 				       :pos (make-instance 'point :x 0 :y 0)
 				       :vel (make-instance 'point :x 0 :y 0)
 				       :mass 1e13)
-
-			
 			(make-instance 'body
 				       :pos (make-instance 'point :x 0 :y -150)
 				       :vel (make-instance 'point :x 2 :y 0)
-				       :mass 0.5e11)
+				       :mass 0.5e12)
 			(make-instance 'body
 				       :pos (make-instance 'point :x 300 :y 0)
 				       :vel (make-instance 'point :x 0 :y 1)
-				       :mass 1e11)
+				       :mass 1e12)
 ))
