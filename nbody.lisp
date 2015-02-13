@@ -2,7 +2,7 @@
 
 (defparameter *G* 6.67e-11)
 (defparameter *quit* 'nil)
-(defparameter *scale* 1e12)
+(defparameter *scale* 1e10)
 
 (defclass point ()
   ((x :type number
@@ -14,7 +14,7 @@
       :initarg :y
       :initform 0)))
 
-(defparameter *screen-size* (make-instance 'point :x 1600 :y 1000))
+(defparameter *screen-size* (make-instance 'point :x 1000 :y 700))
 
 (defclass body ()
   ((pos :type point
@@ -66,11 +66,10 @@
 		 :x (apply #'+ (mapcar #'x points))
 		 :y (apply #'+ (mapcar #'y points))))
 
-(defun point/ (pt1 pt2)
-  "adds the x and y values of the points given"
+(defun point/ (pt num)
   (make-instance 'point
-		 :x (apply #'/ (mapcar #'x points))
-		 :y (apply #'/ (mapcar #'y points))))
+		 :x (/ (x pt) num) 
+		 :y (/ (y pt) num)))
 
 (defun find-acel (body bodies)
   (apply #'point+
@@ -98,8 +97,8 @@
 (defun collidep (bod1 bod2)
   "Checks if the two bodies are colliding"
   (if (< (dist (pos bod1) (pos bod2))
-	 (+ (ceiling (/ (mass bod1) *scale*))
-	    (ceiling (/ (mass bod2) *scale*))))
+	 (+ (+ 1 (ceiling (/ (mass bod1) *scale*)))
+	    (+ 1 (ceiling (/ (mass bod2) *scale*)))))
       't))
 
 (defun sum-masses (&rest bods)
@@ -109,16 +108,17 @@
 (defun total-momentum (&rest bods)
   (flet ((mom (bods xy)
 	   (apply #'+
-		  (mapcar #'(lambda (x) (* (mass x) (slot-value (pos x) xy)))
+		  (mapcar #'(lambda (x) (* (mass x) (slot-value (vel x) xy)))
 			  bods))))
     (make-instance 'point :x (mom bods 'x) :y (mom bods 'y))))
 
 (defun handle-collision (bod1 bod2 bodies)
-  (list (remove bod1 (remove bod2 bodies))
-	(make-instance 'body
+  (append (remove bod1 (remove bod2 bodies))
+	(list (make-instance 'body
 		       :pos (centre-of-mass (list bod1 bod2))
-		       :vel (point/ (total-momentum bod1 bod2) (sum-masses bod1 bod2))
-		       :mass (sum-masses bod1 bod2))))
+		       :vel (point/ (total-momentum bod1 bod2)
+				    (sum-masses bod1 bod2))
+		       :mass (sum-masses bod1 bod2)))))
 
 (defun centre-of-mass (bodies)
   "Returns the centre of mass of the list of bodies given"
@@ -169,10 +169,12 @@
 			    (make-instance 'point :x 0 :y 0))
 			   :color sdl:*red*)
 
-	   (loop for i in *bodies*
-	      do (loop for j in (remove i *bodies*)
-		    do (if (collidep i j)
-			   (setq *bodies* (handle-collision i j *bodies*)))))
+	   (let ((tmpbods *bodies*))
+	     (dolist (i *bodies*)
+	       (progn (setq tmpbods (remove i tmpbods))
+		      (dolist (j tmpbods)
+			(if (collidep i j)
+			    (setq *bodies* (handle-collision i j *bodies*)))))))
 
 	   (sdl:update-display))))
 
@@ -181,10 +183,11 @@
     (sdl-init)
     (sdl-main-loop))) 
 
+#|
 (defparameter *bodies* (list
 			(make-instance 'body
 				       :pos (make-instance 'point :x -200 :y 0)
-				       :vel (make-instance 'point :x 0 :y 0)
+				       :vel (make-instance 'point :x 0 :y 2)
 				       :mass 1e12)
 			(make-instance 'body 
 				       :pos (make-instance 'point :x 20 :y 0)
@@ -207,3 +210,51 @@
 				       :vel (make-instance 'point :x 2 :y 0)
 				       :mass 1e12)
 ))
+|#
+
+(defun genbods (n)
+  (loop for i from 1 to n
+     collecting (make-instance 'body
+			       :pos (make-instance 'point
+						   :x (+ 20 (random 300))
+						   :y 0)
+			       :vel (make-instance 'point
+						   :x (random 5)
+						   :y (random 5))
+			       :mass *scale*)))
+
+(defparameter *bodies*
+  (list
+   (make-instance 'body
+		  :pos (make-instance 'point :x 0 :y 0)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass 1e10)
+   (make-instance 'body
+		  :pos (make-instance 'point :x -100 :y 0)
+		  :vel (make-instance 'point :x 0 :y 2)
+		  :mass 1e10)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 0 :y 100)
+		  :vel (make-instance 'point :x -2 :y 0)
+		  :mass 1e10)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 50 :y 0)
+		  :vel (make-instance 'point :x 1 :y 0)
+		  :mass 1e10)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 0 :y 120)
+		  :vel (make-instance 'point :x 1 :y 2)
+		  :mass 1e10)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 0 :y 100)
+		  :vel (make-instance 'point :x -1 :y 2)
+		  :mass 1e10)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 75 :y 30)
+		  :vel (make-instance 'point :x 1 :y 2)
+		  :mass 1e10)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 0 :y 20)
+		  :vel (make-instance 'point :x 1 :y 2)
+		  :mass 1e10)
+   ))
