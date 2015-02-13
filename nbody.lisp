@@ -1,5 +1,8 @@
+;;;; N BODY SIMULATOR
+
 (ql:quickload "lispbuilder-sdl")
 
+;; define some stuff
 (defparameter *G* 6.67e-11)
 (defparameter *quit* 'nil)
 (defparameter *scale* 1e12)
@@ -30,6 +33,7 @@
 	 :initarg :mass
 	 :initform 0)))
 
+;; functions for file io
 (defun body-to-list (body)
   "Converts a body into a list of its attributes"
   (list (x (pos body))         
@@ -44,7 +48,6 @@
 
 (define-condition invalid-filename (error)
   ((filename :initarg :filename :accessor filename)))
-
 
 (defun check-filename (filename)
   (if
@@ -97,6 +100,8 @@
 			 :y (nth 3 bod))
 		   :mass (nth 4 bod))))
 
+
+;; functions for maths and shit
 (defun pos2pos (pos centre)
   "Converts position relative to centre in km to sdl coordinates"
   ; Defines a local function to convert a coordinate relative to sun in km
@@ -155,12 +160,6 @@
   "Calculates the acceleration due to gravity"
   (/ (* *G* M) (* r r)))
 
-(defun draw-body (body centre)
-  "Draws a body to the screen"
-  (sdl:draw-filled-circle
-   (pos2pos (pos body) centre)
-   (+ 1 (ceiling (/ (mass body) *scale*))) :color sdl:*white*))
-
 (defun collidep (bod1 bod2)
   "Checks if the two bodies are colliding"
   (if (< (dist (pos bod1) (pos bod2))
@@ -197,6 +196,13 @@
     (make-instance 'point
 		   :x (centre bodies 'x)
 		   :y (centre bodies 'y))))
+
+;; functions for the sdl shhiz
+(defun draw-body (body centre)
+  "Draws a body to the screen"
+  (sdl:draw-filled-circle
+   (pos2pos (pos body) centre)
+   (+ 1 (ceiling (/ (mass body) *scale*))) :color sdl:*white*))
 
 (defun sdl-init ()
   (sdl:window (x *screen-size*)
