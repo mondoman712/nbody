@@ -2,7 +2,7 @@
 
 (defparameter *G* 6.67e-11)
 (defparameter *quit* 'nil)
-(defparameter *scale* 1e10)
+(defparameter *scale* 1e12)
 
 (defclass point ()
   ((x :type number
@@ -21,14 +21,81 @@
 	:accessor pos
 	:initarg :pos
 	:initform 0)
-   (mass :type number
-	 :accessor mass
-	 :initarg :mass
-	 :initform 0)
    (vel :type point
 	:accessor vel
 	:initarg :vel
-	:initform 0)))
+	:initform 0)
+   (mass :type number
+	 :accessor mass
+	 :initarg :mass
+	 :initform 0)))
+
+(defun body-to-list (body)
+  "Converts a body into a list of its attributes"
+  (list (x (pos body))         
+	(y (pos body))         
+	(x (vel body))         
+	(y (vel body))         
+	(mass body)))         
+
+(defun bodies-to-list (bodies)
+  "Calls body-to-list on a list of bodies"
+  (mapcar #'body-to-list bodies))
+
+(define-condition invalid-filename (error)
+  ((filename :initarg :filename :accessor filename)))
+
+
+(defun check-filename (filename)
+  (if
+   (zerop
+    (count-if #'characterp
+	      (mapcar #'(lambda (c) (find c filename :test #'equalp))
+		      (cond ((string= (software-type) "Linux")
+			     '(#\/ #\NULL #\; #\: #\|))
+			    ((string= (software-type) "Windows")
+			     '(#\< #\> #\: #\/ #\\ #\| #\? #\*))
+			    (t 'nil)))))
+   filename
+   (error 'invalid-filename)))
+
+(defun save-list (lst filename)
+  "Saves the list given to a file with the name given"
+  (with-open-file (out filename
+		       :direction :output
+		       :if-exists :supersede)
+    (with-standard-io-syntax
+      (print lst out))))
+
+(defun save-bodies (filename)
+  "Calls save-list and body-to-list"
+  (handler-case
+      (save-list (bodies-to-list *bodies*)
+		 (check-filename filename))
+    (invalid-filename ()
+      (error-message "Please enter a valid filename"))))
+
+(defun read-list (filename)
+  "Reads from a file with the name given"
+  (with-open-file (in filename)
+    (with-standard-io-syntax
+      (read in))))
+
+(defun read-bodies (filename)
+    "Reads from a file and converts the lists in the file
+   into instances of the body class"
+    (loop for bod in (read-list filename)
+       collecting (make-instance
+		   'body
+		   :pos (make-instance
+			 'point
+			 :x (nth 0 bod)
+			 :y (nth 1 bod))
+		   :vel (make-instance
+			 'point
+			 :x (nth 2 bod)
+			 :y (nth 3 bod))
+		   :mass (nth 4 bod))))
 
 (defun pos2pos (pos centre)
   "Converts position relative to centre in km to sdl coordinates"
@@ -183,7 +250,6 @@
     (sdl-init)
     (sdl-main-loop))) 
 
-#|
 (defparameter *bodies* (list
 			(make-instance 'body
 				       :pos (make-instance 'point :x -200 :y 0)
@@ -210,7 +276,6 @@
 				       :vel (make-instance 'point :x 2 :y 0)
 				       :mass 1e12)
 ))
-|#
 
 (defun genbods (n)
   (loop for i from 1 to n
@@ -228,33 +293,41 @@
    (make-instance 'body
 		  :pos (make-instance 'point :x 0 :y 0)
 		  :vel (make-instance 'point :x 0 :y 0)
-		  :mass 1e10)
+		  :mass *scale*)
    (make-instance 'body
 		  :pos (make-instance 'point :x -100 :y 0)
 		  :vel (make-instance 'point :x 0 :y 2)
-		  :mass 1e10)
+		  :mass *scale*)
    (make-instance 'body
 		  :pos (make-instance 'point :x 0 :y 100)
-		  :vel (make-instance 'point :x -2 :y 0)
-		  :mass 1e10)
+		  :vel (make-instance 'point :x 2 :y 0)
+		  :mass *scale*)
    (make-instance 'body
 		  :pos (make-instance 'point :x 50 :y 0)
-		  :vel (make-instance 'point :x 1 :y 0)
-		  :mass 1e10)
+		  :vel (make-instance 'point :x 0 :y -2)
+		  :mass *scale*)
    (make-instance 'body
 		  :pos (make-instance 'point :x 0 :y 120)
-		  :vel (make-instance 'point :x 1 :y 2)
-		  :mass 1e10)
+		  :vel (make-instance 'point :x 1 :y 0)
+		  :mass *scale*)
    (make-instance 'body
-		  :pos (make-instance 'point :x 0 :y 100)
+		  :pos (make-instance 'point :x 0 :y -100)
 		  :vel (make-instance 'point :x -1 :y 2)
-		  :mass 1e10)
+		  :mass *scale*)
    (make-instance 'body
 		  :pos (make-instance 'point :x 75 :y 30)
 		  :vel (make-instance 'point :x 1 :y 2)
-		  :mass 1e10)
+		  :mass *scale*)
    (make-instance 'body
 		  :pos (make-instance 'point :x 0 :y 20)
-		  :vel (make-instance 'point :x 1 :y 2)
-		  :mass 1e10)
+		  :vel (make-instance 'point :x 1 :y -2)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 0 :y 70)
+		  :vel (make-instance 'point :x 1 :y -2)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 300 :y 20)
+		  :vel (make-instance 'point :x -1 :y -2)
+		  :mass *scale*)
    ))
