@@ -33,6 +33,7 @@
 	 :initarg :mass
 	 :initform 0)))
 
+
 ;; functions for file io
 (defun body-to-list (body)
   "Converts a body into a list of its attributes"
@@ -302,38 +303,143 @@
 		  :mass *scale*)
    (make-instance 'body
 		  :pos (make-instance 'point :x -100 :y 0)
-		  :vel (make-instance 'point :x 0 :y 2)
+		  :vel (make-instance 'point :x 0 :y 0)
 		  :mass *scale*)
    (make-instance 'body
 		  :pos (make-instance 'point :x 0 :y 100)
-		  :vel (make-instance 'point :x 2 :y 0)
+		  :vel (make-instance 'point :x 0 :y 0)
 		  :mass *scale*)
    (make-instance 'body
 		  :pos (make-instance 'point :x 50 :y 0)
-		  :vel (make-instance 'point :x 0 :y -2)
+		  :vel (make-instance 'point :x 0 :y 0)
 		  :mass *scale*)
    (make-instance 'body
 		  :pos (make-instance 'point :x 0 :y 120)
-		  :vel (make-instance 'point :x 1 :y 0)
+		  :vel (make-instance 'point :x 0 :y 0)
 		  :mass *scale*)
    (make-instance 'body
 		  :pos (make-instance 'point :x 0 :y -100)
-		  :vel (make-instance 'point :x -1 :y 2)
+		  :vel (make-instance 'point :x 0 :y 0)
 		  :mass *scale*)
    (make-instance 'body
 		  :pos (make-instance 'point :x 75 :y 30)
-		  :vel (make-instance 'point :x 1 :y 2)
+		  :vel (make-instance 'point :x 0 :y 0)
 		  :mass *scale*)
    (make-instance 'body
 		  :pos (make-instance 'point :x 0 :y 20)
-		  :vel (make-instance 'point :x 1 :y -2)
+		  :vel (make-instance 'point :x 0 :y 0)
 		  :mass *scale*)
    (make-instance 'body
 		  :pos (make-instance 'point :x 0 :y 70)
-		  :vel (make-instance 'point :x 1 :y -2)
+		  :vel (make-instance 'point :x 0 :y 0)
 		  :mass *scale*)
    (make-instance 'body
 		  :pos (make-instance 'point :x 300 :y 20)
-		  :vel (make-instance 'point :x -1 :y -2)
+		  :vel (make-instance 'point :x 0 :y 0)
 		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 350 :y 20)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 200 :y -20)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 100 :y -20)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 140 :y -80)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 10 :y -80)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 10 :y -180)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 10 :y 180)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 0 :y 150)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 0 :y 420)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x -200 :y 120)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x -400 :y 0)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 400 :y 0)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 200 :y 0)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 200 :y 200)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 250 :y 20)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 20 :y 250)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 20 :y 350)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 20 :y 300)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 0 :y 300)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 0 :y 390)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 0 :y 30)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 0 :y -30)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 300 :y -300)
+		  :vel (make-instance 'point :x 1 :y 0)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x 10 :y 0)
+		  :vel (make-instance 'point :x 2 :y 1)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x -10 :y 0)
+		  :vel (make-instance 'point :x 2 :y 1)
+		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x -500 :y 0)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
+
    ))
