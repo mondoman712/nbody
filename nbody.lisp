@@ -148,8 +148,12 @@
   (apply #'point+
 	 (mapcar
 	  #'(lambda (x)
-	      (split-force (calc-g (mass x) (dist (pos body) (pos x)))
-			   (ang (pos x) (pos body))))
+	      (handler-case 
+		  (split-force (calc-g (mass x) (dist (pos body) (pos x)))
+			       (ang (pos x) (pos body)))
+	      (division-by-zero ()
+				(setq *bodies*
+				      (handle-collision x body *bodies*)))))
 	  (remove body bodies))))
 
 (defun update-pos (body)
@@ -161,12 +165,20 @@
   "Calculates the acceleration due to gravity"
   (/ (* *G* M) (* r r)))
 
+(defun point= (a b)
+  (and (= (x a) (x b)) (= (y a) (y b))))
+
+(define-condition repeated-bodies (error)
+  ((repeat :initarg :repeat :accessor repeat)))
+
 (defun collidep (bod1 bod2)
   "Checks if the two bodies are colliding"
-  (if (< (dist (pos bod1) (pos bod2))
-	 (+ (+ 1 (ceiling (/ (mass bod1) *scale*)))
-	    (+ 1 (ceiling (/ (mass bod2) *scale*)))))
-      't))
+  (if (point= (pos bod1) (pos bod2))
+      (error 'repeated-bodies)
+      (if (< (dist (pos bod1) (pos bod2))
+	     (+ (+ 1 (ceiling (/ (mass bod1) *scale*)))
+		(+ 1 (ceiling (/ (mass bod2) *scale*)))))
+	  't)))
 
 (defun sum-masses (&rest bods)
   "Returns the sum of the masses of the given bodies"
@@ -231,7 +243,12 @@
 
 	   (mapc #'update-pos *bodies*)
 	   (let ((centre (centre-of-mass *bodies*)))
-	     (mapc #'(lambda (x) (draw-body x centre)) *bodies*))
+	     (mapc #'(lambda (x)
+		       (handler-case
+			   (draw-body x centre)
+			 (repeated-bodies ()
+			   (setq *bodies* (remove body *bodies*)))))
+		   *bodies*))
 
 	   (sdl:draw-pixel (pos2pos
 			    (make-instance 'point :x 0 :y 0)
@@ -443,3 +460,4 @@
 		  :mass *scale*)
 
    ))
+
