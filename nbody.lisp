@@ -3,10 +3,6 @@
 (ql:quickload "lispbuilder-sdl")
 
 ;; define some stuff
-(defparameter *G* 6.67e-11)
-(defparameter *quit* 'nil)
-(defparameter *scale* 1e12)
-
 (defclass point ()
   ((x :type number
       :accessor x
@@ -17,7 +13,6 @@
       :initarg :y
       :initform 0)))
 
-(defparameter *screen-size* (make-instance 'point :x 1000 :y 700))
 
 (defclass body ()
   ((pos :type point
@@ -33,6 +28,10 @@
 	 :initarg :mass
 	 :initform 0)))
 
+(defparameter *screen-size* (make-instance 'point :x 1000 :y 700))
+(defparameter *G* 6.67e-11)
+(defparameter *quit* 'nil)
+(defparameter *scale* 1e12)
 
 ;; functions for file io
 (defun body-to-list (body)
@@ -71,13 +70,13 @@
     (with-standard-io-syntax
       (print lst out))))
 
-(defun save-bodies (filename)
+(defun save-bodies (bodies filename)
   "Calls save-list and body-to-list"
   (handler-case
-      (save-list (bodies-to-list *bodies*)
+      (save-list (bodies-to-list bodies)
 		 (check-filename filename))
     (invalid-filename ()
-      (error-message "Please enter a valid filename"))))
+      (princ "Please enter a valid filename"))))
 
 (defun read-list (filename)
   "Reads from a file with the name given"
@@ -210,6 +209,21 @@
 		   :x (centre bodies 'x)
 		   :y (centre bodies 'y))))
 
+(defun find-acels (bodies)
+  (mapcar #'(lambda (bod)
+	      (sets #'point+ (slot-value bod 'vel)
+		    (find-acel bod bodies)))
+	  bodies))
+
+(defun draw-bodies (bodies)
+  (let ((centre (centre-of-mass *bodies*)))
+    (mapc #'(lambda (x)
+	      (handler-case
+		  (draw-body x centre)
+		(repeated-bodies ()
+		  (setq bodies (remove x bodies)))))
+	  bodies)))
+
 ;; functions for the sdl shhiz
 (defun draw-body (body centre)
   "Draws a body to the screen"
@@ -217,13 +231,24 @@
    (pos2pos (pos body) centre)
    (+ 1 (ceiling (/ (mass body) *scale*))) :color sdl:*white*))
 
+(defun centre-dots (bodies)
+  (progn
+    (sdl:draw-pixel (pos2pos
+		     (make-instance 'point :x 0 :y 0)
+		     (centre-of-mass bodies))
+		    :color sdl:*red*)
+    (sdl:draw-pixel (pos2pos
+		     (make-instance 'point :x 0 :y 0)
+		     (make-instance 'point :x 0 :y 0))
+		    :color sdl:*red*)))
+
 (defun sdl-init ()
   (sdl:window (x *screen-size*)
 	      (y *screen-size*)
               :title-caption "nbody")
   (setf (sdl:frame-rate) 60))
 
-(defun sdl-main-loop ()
+(defun sdl-main-loop (bodies)
   (sdl:with-events ()
     (:quit-event () t)
     (:key-down-event
@@ -236,43 +261,26 @@
 	     (sdl:quit-sdl))
 	   (sdl:clear-display sdl:*black*)
 
-	   (mapcar #'(lambda (bod)
-		       (sets #'point+ (slot-value bod 'vel)
-			     (find-acel bod *bodies*)))
-		   *bodies*)
+	   (mapc #'update-pos bodies)
 
-	   (mapc #'update-pos *bodies*)
-	   (let ((centre (centre-of-mass *bodies*)))
-	     (mapc #'(lambda (x)
-		       (handler-case
-			   (draw-body x centre)
-			 (repeated-bodies ()
-			   (setq *bodies* (remove body *bodies*)))))
-		   *bodies*))
+	   (centre-dots bodies)
+	   (find-acels bodies)
+	   (draw-bodies bodies)
 
-	   (sdl:draw-pixel (pos2pos
-			    (make-instance 'point :x 0 :y 0)
-			    (centre-of-mass *bodies*))
-			   :color sdl:*red*)
 
-	   (sdl:draw-pixel (pos2pos
-			    (make-instance 'point :x 0 :y 0)
-			    (make-instance 'point :x 0 :y 0))
-			   :color sdl:*red*)
-
-	   (let ((tmpbods *bodies*))
-	     (dolist (i *bodies*)
+	   (let ((tmpbods bodies))
+	     (dolist (i bodies)
 	       (progn (setq tmpbods (remove i tmpbods))
 		      (dolist (j tmpbods)
 			(if (collidep i j)
-			    (setq *bodies* (handle-collision i j *bodies*)))))))
+			    (setq bodies (handle-collision i j bodies)))))))
 
 	   (sdl:update-display))))
 
 (defun main ()
   (sdl:with-init ()
     (sdl-init)
-    (sdl-main-loop))) 
+    (sdl-main-loop *bodies*))) 
 
 (defparameter *bodies* (list
 			(make-instance 'body
@@ -444,15 +452,15 @@
 		  :mass *scale*)
    (make-instance 'body
 		  :pos (make-instance 'point :x 300 :y -300)
-		  :vel (make-instance 'point :x 1 :y 0)
+		  :vel (make-instance 'point :x 0 :y 0)
 		  :mass *scale*)
    (make-instance 'body
 		  :pos (make-instance 'point :x 10 :y 0)
-		  :vel (make-instance 'point :x 2 :y 1)
+		  :vel (make-instance 'point :x 0 :y 0)
 		  :mass *scale*)
    (make-instance 'body
 		  :pos (make-instance 'point :x -10 :y 0)
-		  :vel (make-instance 'point :x 2 :y 1)
+		  :vel (make-instance 'point :x 0 :y 0)
 		  :mass *scale*)
    (make-instance 'body
 		  :pos (make-instance 'point :x -500 :y 0)
