@@ -31,7 +31,7 @@
 (defparameter *screen-size* (make-instance 'point :x 1000 :y 700))
 (defparameter *G* 6.67e-11)
 (defparameter *quit* 'nil)
-(defparameter *scale* 1e12)
+(defparameter *scale* 1e11)
 
 ;; functions for file io
 (defun body-to-list (body)
@@ -261,10 +261,10 @@
 	     (sdl:quit-sdl))
 	   (sdl:clear-display sdl:*black*)
 
+	   (find-acels bodies)
 	   (mapc #'update-pos bodies)
 
 	   (centre-dots bodies)
-	   (find-acels bodies)
 	   (draw-bodies bodies)
 
 
@@ -286,11 +286,11 @@
   (loop for i from 1 to n
      collecting (make-instance 'body
 			       :pos (make-instance 'point
-						   :x (- 400 (random 800))
-						   :y (- 400 (random 800)))
+						   :x (- 500 (random 1000))
+						   :y (- 500 (random 1000)))
 			       :vel (make-instance 'point
-						   :x 0 ;(random 5)
-						   :y 0; (random 5)
+						   :x (- 2 (random 4))
+						   :y (- 2 (random 4))
 						   )
 			       :mass *scale*)))
 
