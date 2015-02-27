@@ -286,11 +286,12 @@
   (loop for i from 1 to n
      collecting (make-instance 'body
 			       :pos (make-instance 'point
-						   :x (+ 20 (random 300))
-						   :y 0)
+						   :x (- 400 (random 800))
+						   :y (- 400 (random 800)))
 			       :vel (make-instance 'point
-						   :x (random 5)
-						   :y (random 5))
+						   :x 0 ;(random 5)
+						   :y 0; (random 5)
+						   )
 			       :mass *scale*)))
 
 (defparameter *bodies* (read-bodies "list1.txt"))
