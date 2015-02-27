@@ -466,6 +466,10 @@
 		  :pos (make-instance 'point :x -500 :y 0)
 		  :vel (make-instance 'point :x 0 :y 0)
 		  :mass *scale*)
+   (make-instance 'body
+		  :pos (make-instance 'point :x -332 :y 0)
+		  :vel (make-instance 'point :x 0 :y 0)
+		  :mass *scale*)
 
    ))
 
