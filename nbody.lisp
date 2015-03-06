@@ -289,8 +289,8 @@
 						   :x (- 500 (random 1000))
 						   :y (- 500 (random 1000)))
 			       :vel (make-instance 'point
-						   :x (- 2 (random 4))
-						   :y (- 2 (random 4))
+						   :x 0 ;(- 2 (random 4))
+						   :y 0 ;(- 2 (random 4))
 						   )
 			       :mass *scale*)))
 
