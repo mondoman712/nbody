@@ -151,8 +151,8 @@
 		  (split-force (calc-g (mass x) (dist (pos body) (pos x)))
 			       (ang (pos x) (pos body)))
 	      (division-by-zero ()
-				(setq *bodies*
-				      (handle-collision x body *bodies*)))))
+				(return-from find-acel
+				      (handle-collision x body bodies)))))
 	  (remove body bodies))))
 
 (defun update-pos (body)
@@ -229,7 +229,7 @@
   "Draws a body to the screen"
   (sdl:draw-filled-circle
    (pos2pos (pos body) centre)
-   (+ 1 (ceiling (/ (mass body) *scale*))) :color sdl:*white*))
+   (+ 1 (ceiling (/ (expt (mass body) 1/3) (/ *scale* 2)))) :color sdl:*white*))
 
 (defun centre-dots (bodies)
   (progn
@@ -254,7 +254,8 @@
     (:key-down-event
      (:key key)
      (when (sdl:key= key :sdl-key-q)
-       (sdl:push-quit-event)))
+       (sdl:push-quit-event)
+       (setq *bodies* bodies)))
     
     (:idle ()
 	   (when *quit* 
@@ -286,8 +287,8 @@
   (loop for i from 1 to n
      collecting (make-instance 'body
 			       :pos (make-instance 'point
-						   :x (- 500 (random 1000))
-						   :y (- 500 (random 1000)))
+						   :x (- 300 (random 600))
+						   :y (- 300 (random 600)))
 			       :vel (make-instance 'point
 						   :x 0 ;(- 2 (random 4))
 						   :y 0 ;(- 2 (random 4))
@@ -295,3 +296,14 @@
 			       :mass *scale*)))
 
 (defparameter *bodies* (read-bodies "list1.txt"))
+
+(defparameter *bodies* (list (make-instance 'body
+					    :pos (make-instance 'point :x 0 :y 0)
+					    :vel (make-instance 'point :x 0 :y 0)
+					    :mass *scale*)
+			     (make-instance 'body
+					    :pos (make-instance 'point :x 0 :y 0)
+					    :vel (make-instance 'point :x 0 :y 0)
+					    :mass *scale*)))
+					    
+					    
