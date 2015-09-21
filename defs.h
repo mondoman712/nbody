@@ -1,3 +1,8 @@
+#ifndef _defs_h
+#define _defs_h
+
 #include <SDL/SDL.h>
 
-int sdl-window(int argc, char *argv[]);
+int makesdlwindow(int width);
+
+#endif // _defs_h

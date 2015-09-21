@@ -1,5 +1,5 @@
-(require-extension bind)
 (import foreign)
 
-(bind* "#include \"defs.h\"")
-(bind "int sdl-window(int argc, char *argv[]);")
+(foreign-declare "#include \"defs.h\"")
+(define sdl-window
+  (foreign-lambda int makesdlwindow int))
