@@ -2,8 +2,37 @@
 
 int main (int argc, char* argv[]) {
 
-	static const int width = 1024;
-	static const int height = 768;
+
+/*
+	int widthVal = 1024;
+	int heightVal = 768;
+
+	int *width = &widthVal;
+	int *height = &heightVal;
+*/
+
+	int width = 1024;
+	int height = 768;
+
+	int opt;
+
+	while ((opt = getopt(argc, argv, "w:h:")) != -1) {
+		switch(opt) {
+			case 'w':
+				width = (int *)optarg;
+				break;
+			case 'h':
+				height = (int *)optarg;
+				break;
+			case '?':
+				fprintf(stderr, 
+					"Option -%c requires an argument.\n", 
+					optopt);
+				return 1;
+			default:
+				abort();
+		}
+	}
 
 	SDL_Window *window;
 	SDL_Renderer *renderer;
@@ -30,7 +59,7 @@ int main (int argc, char* argv[]) {
 
 
 	if (window == NULL) {
-		printf("does broke: %s\n", SDL_GetError());
+		printf("error: %s\n", SDL_GetError());
 		return 1;
 	}
 
@@ -42,7 +71,7 @@ int main (int argc, char* argv[]) {
 		}
 
 //		SDL_RenderClear(renderer);
-		filledCircleRGBA(renderer, 512, 384, 20, 255, 255, 255, 255);
+		filledCircleRGBA(renderer, (width/2), (height/2), 20, 255, 255, 255, 255);
 		SDL_RenderPresent(renderer);
 	}
 
