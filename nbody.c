@@ -50,10 +50,11 @@ void draw_circle(SDL_Surface *surface, int n_cx, int n_cy, int radius,
 
 int main (int argc, char* argv[]) {
 
+	static const int width = 1024;
+	static const int height = 768;
+
 	SDL_Window *window;
 	SDL_Renderer *renderer;
-	SDL_Texture *bitmapTex;
-	SDL_Surface *bitmapSurface;
 
 	SDL_Init(SDL_INIT_VIDEO);
 
@@ -61,16 +62,20 @@ int main (int argc, char* argv[]) {
 			"nbody",
 			SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED,
-			1024,
-			768,
+			width,
+			height,
 			0
 			);
 
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	renderer = SDL_CreateRenderer(window, -1, 0);
 
-	bitmapSurface = SDL_LoadBMP("hello.bmp");
-	bitmapTex = SDL_CreateTextureFromSurface(renderer, bitmapSurface);
-	SDL_FreeSurface(bitmapSurface);
+	// set screen to black
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	SDL_RenderClear(renderer);
+	SDL_RenderPresent(renderer);
+
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+
 
 	if (window == NULL) {
 		printf("does broke: %s\n", SDL_GetError());
@@ -85,15 +90,14 @@ int main (int argc, char* argv[]) {
 		}
 
 		SDL_RenderClear(renderer);
-		SDL_RenderCopy(renderer, bitmapTex, NULL, NULL);
+		circleRGBA(renderer, 0, 0, 1, 255, 255, 255, 255);
 		SDL_RenderPresent(renderer);
 	}
 
-	//SDL_Delay(3000);
-
-	SDL_DestroyTexture(bitmapTex);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
+
+
 	atexit(SDL_Quit);
 
 	return 0;
