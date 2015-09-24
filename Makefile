@@ -1,6 +1,6 @@
 CC = gcc
 
-CFLAGS = -g -Wall -lSDL -lSDL_gfx 
+CFLAGS = -g -Wall -lSDL2 -lSDL2_gfx 
 
 TARGET = nbody
 
