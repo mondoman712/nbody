@@ -89,8 +89,8 @@ int main (int argc, char* argv[]) {
 				break;
 		}
 
-		SDL_RenderClear(renderer);
-		circleRGBA(renderer, 0, 0, 1, 255, 255, 255, 255);
+//		SDL_RenderClear(renderer);
+		filledCircleRGBA(renderer, 512, 384, 20, 255, 255, 255, 255);
 		SDL_RenderPresent(renderer);
 	}
 
