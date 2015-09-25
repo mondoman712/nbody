@@ -1,5 +1,15 @@
 #include "defs.h"
 
+void drawFromScheme(SDL_Renderer renderer) {
+
+	SCM funcPos;
+	SCM valPos;
+	struct
+
+	scm_init_guile();
+
+	scm_c_primitive_load("bodypos.scm");
+
 int main (int argc, char* argv[]) {
 
 	int width = 1024;
@@ -62,7 +72,6 @@ int main (int argc, char* argv[]) {
 		}
 
 //		SDL_RenderClear(renderer);
-		filledCircleRGBA(renderer, (width/2), (height/2), 20, 255, 255, 255, 255);
 		SDL_RenderPresent(renderer);
 	}
 

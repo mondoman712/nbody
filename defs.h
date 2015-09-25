@@ -10,5 +10,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
 
+// Guile
+#include <libguile.h>
+
 
 #endif // _defs_h
