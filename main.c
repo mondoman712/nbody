@@ -2,15 +2,6 @@
 
 int main (int argc, char* argv[]) {
 
-
-/*
-	int widthVal = 1024;
-	int heightVal = 768;
-
-	int *width = &widthVal;
-	int *height = &heightVal;
-*/
-
 	int width = 1024;
 	int height = 768;
 
