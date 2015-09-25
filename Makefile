@@ -1,6 +1,7 @@
 CC = gcc
 
-CFLAGS = -g -Wall -lSDL2 -lSDL2_gfx `pkg-config --cflags guile-2.0`
+CFLAGS = -g -Wall -lSDL2 -lSDL2_gfx -lpthread `guile-config compile`
+LIBS = `guile-config link`
 
 TARGET = nbody
 MAIN = main.c
@@ -12,3 +13,6 @@ $(TARGET): $(MAIN)
 
 clean:
 	$(RM) $(TARGET)
+
+run:
+	./$(TARGET)

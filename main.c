@@ -1,14 +1,58 @@
 #include "defs.h"
 
+/*
 void drawFromScheme(SDL_Renderer renderer) {
+
+	struct circle {
+
 
 	SCM funcPos;
 	SCM valPos;
-	struct
+	struct circle {
+		int x;
+		int y;
+		int rad;
+		int r;
+		int g;
+		int b;
+		int a;
+	}
+
 
 	scm_init_guile();
 
 	scm_c_primitive_load("bodypos.scm");
+
+	funcPos = scm_variable_ref(scm_c_lookup("bodypos"));
+	valPos = scm_call_1(funcPos, scm_
+*/
+
+SDL_Window *window;
+SDL_Renderer *renderer;
+
+SCM draw_circle(int x, int y, int rad, int r, int g, int b, int a) {
+	filledCicleRGBA(renderer, x, y, rad, r, g, b, a);
+	return NULL;
+}
+
+static void* register_functions(void* data) {
+	return NULL;
+}
+
+void *SDL_main_loop(){
+	while (1) {
+		SDL_Event e;
+		if (SDL_PollEvent (&e)) {
+			if (e.type == SDL_QUIT)
+				break;
+		}
+
+//		SDL_RenderClear(renderer);
+		SDL_RenderPresent(renderer);
+	}
+
+	return NULL;
+}
 
 int main (int argc, char* argv[]) {
 
@@ -34,9 +78,6 @@ int main (int argc, char* argv[]) {
 				abort();
 		}
 	}
-
-	SDL_Window *window;
-	SDL_Renderer *renderer;
 
 	SDL_Init(SDL_INIT_VIDEO);
 
@@ -64,16 +105,15 @@ int main (int argc, char* argv[]) {
 		return 1;
 	}
 
-	while (1) {
-		SDL_Event e;
-		if (SDL_PollEvent (&e)) {
-			if (e.type == SDL_QUIT)
-				break;
-		}
+	pthread_t *tid_sdl;
+	//pthread_t tid_guile;
 
-//		SDL_RenderClear(renderer);
-		SDL_RenderPresent(renderer);
-	}
+	pthread_create(&tid_sdl, NULL, SDL_main_loop, NULL);
+
+	scm_with_guile(&register_functions, NULL);
+	scm_shell(argc, argv);
+
+	pthread_join(&tid_sdl, NULL);
 
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
