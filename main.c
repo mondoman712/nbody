@@ -19,10 +19,10 @@ int main (int argc, char* argv[]) {
 	while ((opt = getopt(argc, argv, "w:h:")) != -1) {
 		switch(opt) {
 			case 'w':
-				width = (int *)optarg;
+				width = atoi(optarg);
 				break;
 			case 'h':
-				height = (int *)optarg;
+				height = atoi(optarg);
 				break;
 			case '?':
 				fprintf(stderr, 
