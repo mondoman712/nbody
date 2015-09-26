@@ -12,7 +12,7 @@
 #include <SDL2/SDL2_gfxPrimitives.h>
 
 // Guile
-//#include <libguile.h>
+#include <libguile.h>
 
 //My includes
 #include "scheme_interface.h"

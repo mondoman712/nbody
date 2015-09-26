@@ -1,4 +1,3 @@
-#include <libguile.h>
 #include "defs.h"
 
 /*

@@ -1,6 +1,6 @@
 CC = gcc
 
-CFLAGS = -g -Wall -lSDL2 -lSDL2_gfx `guile-config compile`
+CFLAGS = -g -Wall -lSDL2 -lSDL2_gfx `pkg-config --cflags guile-2.0`
 LIBS = `guile-config link`
 
 PHONY: clean build run

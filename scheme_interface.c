@@ -1,7 +1,6 @@
-#include <libguile.h>
 #include "defs.h"
 
-static void* register_functions(void* data) {
+void* register_functions(void* data) {
 	return NULL;
 }
 
