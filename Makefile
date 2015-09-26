@@ -1,6 +1,6 @@
 CC = gcc
 
-CFLAGS = -g -Wall -lSDL2 -lSDL2_gfx -lpthread `guile-config compile`
+CFLAGS = -g -Wall -lSDL2 -lSDL2_gfx `guile-config compile`
 LIBS = `guile-config link`
 
 PHONY: clean build run
@@ -17,7 +17,7 @@ $(TARGET): $(MAIN).o
 	#$(CC) $(CFLAGS) -o $(TARGET) $(MAIN)
 
 $(MAIN).o: $(MAIN).c
-	$(CC) -c $< -o $@ $(CFLAGS)
+	$(CC) -pthread -c $< -o $@ $(CFLAGS)
 
 clean:
 	$(RM) $(TARGET)
