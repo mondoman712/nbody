@@ -1,26 +1,25 @@
 CC = gcc
 
-CFLAGS = -g -Wall -lSDL2 -lSDL2_gfx `pkg-config --libs --cflags guile-2.0`
+CFLAGS = -c -g -Wall -lSDL2 -lSDL2_gfx `pkg-config --libs --cflags guile-2.0`
 LIBS = `guile-config link`
 
-PHONY: clean build run
-
 TARGET = nbody
-MAIN = main
 
 all: $(TARGET)
 
 build: $(TARGET)
 
-$(TARGET): $(MAIN).o
-	#$(CC) $< -o $@ $(LIBS)
-	$(CC) -o $(TARGET) $(MAIN).c $(CFLAGS) 
+$(TARGET): main.o scheme_interface.o
+	$(CC) main.o scheme_interface.o -o $(TARGET)
 
-$(MAIN).o: $(MAIN).c
-	$(CC) -c $< -o $@ $(CFLAGS)
+main.o: main.c
+	$(CC) $(CFLAGS) main.c
+
+scheme_interface.o: scheme_interface.c
+	$(CC) $(CFLAGS) scheme_interface.c
 
 clean:
-	$(RM) $(TARGET)
+	$(RM) $(TARGET) *.o
 
 run:
 	./$(TARGET)
