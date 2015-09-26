@@ -30,10 +30,7 @@ void drawFromScheme(SDL_Renderer renderer) {
 SDL_Window *window;
 SDL_Renderer *renderer;
 
-SCM draw_circle(int x, int y, int rad, int r, int g, int b, int a) {
-	filledCicleRGBA(renderer, x, y, rad, r, g, b, a);
-	return NULL;
-}
+SCM draw_circle(int x, int y, int rad, int r, int g, int b, int a);
 
 static void* register_functions(void* data) {
 	return NULL;
@@ -123,3 +120,4 @@ int main (int argc, char* argv[]) {
 
 	return 0;
 }
+

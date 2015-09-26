@@ -14,5 +14,7 @@
 // Guile
 #include <libguile.h>
 
+//My includes
+#include "scheme_interface.h"
 
 #endif // _defs_h
