@@ -30,12 +30,6 @@ void drawFromScheme(SDL_Renderer renderer) {
 SDL_Window *window;
 SDL_Renderer *renderer;
 
-SCM draw_circle(int x, int y, int rad, int r, int g, int b, int a);
-
-static void* register_functions(void* data) {
-	return NULL;
-}
-
 void *SDL_main_loop(){
 	while (1) {
 		SDL_Event e;
