@@ -5,14 +5,14 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <unistd.h>
-#include <pthread.h>
+//#include <pthread.h>
 
 // SDL Libraries
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
 
 // Guile
-#include <libguile.h>
+//#include <libguile.h>
 
 //My includes
 #include "scheme_interface.h"

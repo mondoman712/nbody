@@ -1,3 +1,4 @@
+#include <libguile.h>
 #include "defs.h"
 
 static void* register_functions(void* data) {

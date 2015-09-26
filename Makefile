@@ -13,11 +13,11 @@ all: $(TARGET)
 build: $(TARGET)
 
 $(TARGET): $(MAIN).o
-	$(CC) $< -o $@ $(LIBS)
-	#$(CC) $(CFLAGS) -o $(TARGET) $(MAIN)
+	#$(CC) $< -o $@ $(LIBS)
+	$(CC) -o $(TARGET) $(MAIN).c $(CFLAGS) 
 
 $(MAIN).o: $(MAIN).c
-	$(CC) -pthread -c $< -o $@ $(CFLAGS)
+	$(CC) -c $< -o $@ $(CFLAGS)
 
 clean:
 	$(RM) $(TARGET)

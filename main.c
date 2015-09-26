@@ -1,3 +1,4 @@
+#include <libguile.h>
 #include "defs.h"
 
 /*
@@ -96,14 +97,16 @@ int main (int argc, char* argv[]) {
 		return 1;
 	}
 
-	pthread_t tid_sdl;
+//	pthread_t tid_sdl;
 
-	pthread_create(&tid_sdl, NULL, SDL_main_loop, NULL);
+//	pthread_create(&tid_sdl, NULL, SDL_main_loop, NULL);
 
 	scm_with_guile(&register_functions, NULL);
 	scm_shell(argc, argv);
 
-	pthread_join(tid_sdl, NULL);
+//	pthread_join(tid_sdl, NULL);
+
+	SDL_main_loop();
 
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
