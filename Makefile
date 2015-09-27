@@ -1,6 +1,6 @@
 CC = gcc
-CFLAGS = -c -Wall
-LDFLAGS = -g -lm -lSDL2 -lSDL2_gfx `pkg-config --libs --cflags guile-2.0`
+CFLAGS = -c -Wall `guile-config compile`
+LDFLAGS = -g -lm -lSDL2 -lSDL2_gfx `guile-config link`
 
 nbody: main.o scheme_interface.o
 	$(CC) $(LDFLAGS) -o nbody main.o scheme_interface.o
