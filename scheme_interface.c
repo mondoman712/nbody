@@ -7,15 +7,15 @@ void* register_functions(void* data) {
 }
 
 SCM draw_square(int x, int y, int rad, int r, int g, int b, int a) {
-	SDL_Rect r;
-	r.x = x;
-	r.y = y;
-	r.w = rad;
-	r.h = rad;
+	SDL_Rect rect;
+	rect.x = x;
+	rect.y = y;
+	rect.w = rad;
+	rect.h = rad;
 
 	SDL_SetRenderDrawColor(renderer, r, g, b, a);
 	
-	SDL_RenderFillRect(renderer, &r);
+	SDL_RenderFillRect(renderer, &rect);
 
 	SDL_RenderPresent(renderer);
 
