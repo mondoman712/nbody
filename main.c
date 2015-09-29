@@ -1,8 +1,5 @@
 #include "defs.h"
 
-SDL_Window *window;
-SDL_Renderer *renderer;
-
 void *SDL_main_loop(){
 	while (1) {
 		SDL_Event e;

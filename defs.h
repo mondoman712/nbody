@@ -15,5 +15,6 @@
 
 //My includes
 #include "scheme_interface.h"
+#include "main.h"
 
 #endif // _defs_h
