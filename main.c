@@ -1,32 +1,5 @@
 #include "defs.h"
 
-/*
-void drawFromScheme(SDL_Renderer renderer) {
-
-	struct circle {
-
-
-	SCM funcPos;
-	SCM valPos;
-	struct circle {
-		int x;
-		int y;
-		int rad;
-		int r;
-		int g;
-		int b;
-		int a;
-	}
-
-
-	scm_init_guile();
-
-	scm_c_primitive_load("bodypos.scm");
-
-	funcPos = scm_variable_ref(scm_c_lookup("bodypos"));
-	valPos = scm_call_1(funcPos, scm_
-*/
-
 SDL_Window *window;
 SDL_Renderer *renderer;
 

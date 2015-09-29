@@ -5,6 +5,6 @@
 
 // Function Defanitions
 void* register_functions(void* data);
-SCM draw_circle(int x, int y, int rad, int r, int g, int b, int a);
+SCM draw_square(int x, int y, int rad, int r, int g, int b, int a);
 
 #endif // _scheme_interface_h
