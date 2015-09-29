@@ -2,7 +2,15 @@
 
 void* register_functions(void* data) {
 	scm_c_define_gsubr("draw-square", 7, 0, 0, &draw_square);
+	scm_c_define_gsubr("clear-screen", 0, 0, 0, &clear_screen);
 	return NULL;
+}
+
+SCM clear_screen() {
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	SDL_RenderClear(renderer);
+	SDL_RenderPresent(renderer);
+	return SCM_UNSPECIFIED;
 }
 
 SCM draw_square(int x, int y, int rad, int r, int g, int b, int a) {
