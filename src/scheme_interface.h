@@ -3,7 +3,7 @@
 
 #include "defs.h"
 
-// Function Defanitions
+// Function Definitions
 void* register_functions(void* data);
 SCM clear_screen();
 SCM draw_square(int x, int y, int w, int h, int r, int g, int b, int a);
