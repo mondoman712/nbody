@@ -12,6 +12,5 @@ int draw_circle(SDL_Renderer *rend, Sint16 x, Sint16 y, Sint16 rad,
 		return 0;
 	}
 
-	Sint16 countx = 0;
-	Sint16 county = rad;
-	Sint16 
+	SDL_RenderDrawLine(rend, x - rad, x + rad, y - rad, y + rad);
+}
