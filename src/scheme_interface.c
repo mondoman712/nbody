@@ -31,6 +31,6 @@ SCM draw_square(int x, int y, int w, int h, int r, int g, int b, int a) {
 }
 
 SCM scm_draw_circle(int x, int y, int rad, int r, int g, int b, int a) {
-	draw_cicle(renderer, x, y, rad, r, g, b, a);
+	draw_circle(renderer, x, y, rad, r, g, b, a);
 	return SCM_UNSPECIFIED;
 }
