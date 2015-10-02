@@ -1,8 +1,6 @@
 #ifndef _scheme_interface_h
 #define _scheme_interface_h
 
-#include "defs.h"
-
 // Function Definitions
 void* register_functions(void* data);
 SCM clear_screen();
