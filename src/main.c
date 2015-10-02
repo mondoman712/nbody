@@ -1,4 +1,12 @@
-#include "defs.h"
+#include <stdlib.h>
+#include <stdint.h>
+#include <unistd.h>
+#include <SDL2/SDL.h>
+#include <libguile.h>
+
+#include "scheme_interface.h"
+#include "draw.h"
+#include "main.h"
 
 void *SDL_main_loop(){
 	while (1) {

@@ -1,4 +1,7 @@
-#include "defs.h"
+#include <libguile.h>
+
+#include "main.h"
+#include "draw.h"
 
 void* register_functions(void* data) {
 	scm_c_define_gsubr("draw-square", 8, 0, 0, &draw_square);
