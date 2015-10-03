@@ -25,7 +25,7 @@ void *SDL_main_loop(){
 
 int main (int argc, char* argv[]) {
 
-	int width = DEFAULT_WIDTH;
+	int width  = DEFAULT_WIDTH;
 	int height = DEFAULT_HEIGHT;
 
 	int opt;
