@@ -11,9 +11,10 @@
 void *SDL_main_loop(){
 	while (1) {
 		SDL_Event e;
-		if (SDL_PollEvent (&e))
+		if (SDL_PollEvent (&e)) {
 			if (e.type == SDL_QUIT)
 				break;
+		}
 
 //		SDL_RenderClear(renderer);
 		SDL_RenderPresent(renderer);
