@@ -1,16 +1,16 @@
 #ifndef _bodydefs_h
 #define _bodydefs_h
 
-typedef struct {
+typedef struct vector_tag{
 	double x;
 	double y;
 } vector;
 
-typedef struct body {
+typedef struct body_tag {
 	vector pos;
 	vector vel;
 	int mass;
-	struct body* nextbod;
+	struct body_tag* nextbod;
 } body;
 
 #endif // _bodydefs_h
