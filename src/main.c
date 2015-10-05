@@ -8,7 +8,7 @@
 #include "draw.h"
 #include "main.h"
 
-static void *SDL_main_loop(){
+static void *SDL_main_loop () {
 	while (1) {
 		SDL_Event e;
 		if (SDL_PollEvent (&e)) {

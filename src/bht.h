@@ -13,7 +13,7 @@ typedef struct {
 
 typedef struct {
 	vector bl;
-	double w;
+	vector tr;
 } quad;
 
 typedef struct bhtree {
