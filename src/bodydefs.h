@@ -13,4 +13,7 @@ typedef struct body_tag {
 	struct body_tag* nextbod;
 } body;
 
+extern body* firstbod;
+extern body* lastbod;
+
 #endif // _bodydefs_h
