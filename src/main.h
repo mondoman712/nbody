@@ -15,7 +15,7 @@ struct body {
 	double rad;
 };
 
-void *SDL_main_loop();
+static void *SDL_main_loop();
 
 #define DEFAULT_WIDTH 1024
 #define DEFAULT_HEIGHT 768
