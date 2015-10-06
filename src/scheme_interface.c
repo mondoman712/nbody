@@ -4,7 +4,7 @@
 #include "main.h"
 #include "draw.h"
 
-static SCM clear_screen ()
+SCM clear_screen ()
 {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
@@ -12,7 +12,7 @@ static SCM clear_screen ()
 	return SCM_UNSPECIFIED;
 }
 
-static SCM draw_square (int x, int y, int w, int h, int r, int g, int b, int a)
+SCM draw_square (int x, int y, int w, int h, int r, int g, int b, int a)
 {
 	SDL_Rect rect;
 	rect.x = x;

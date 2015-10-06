@@ -4,7 +4,7 @@
 SDL_Window *window;
 SDL_Renderer *renderer;
 
-static void *SDL_main_loop();
+void *SDL_main_loop();
 
 #define DEFAULT_WIDTH 1024
 #define DEFAULT_HEIGHT 768

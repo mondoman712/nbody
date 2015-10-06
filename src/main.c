@@ -7,8 +7,10 @@
 #include "scheme_interface.h"
 #include "draw.h"
 #include "main.h"
+#include "bodydefs.h"
+#include "body.h"
 
-static void *SDL_main_loop ()
+void *SDL_main_loop ()
 {
 	while (1) {
 		SDL_Event e;
@@ -84,6 +86,17 @@ int main (int argc, char* argv[])
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 
+	vector pos;
+	pos.x = 100;
+	pos.y = 100;
+	vector vel;
+	vel.x = 0;
+	vel.y = 12;
+
+	body *firstbod = NULL;
+	body *lastbod = NULL;
+
+	add_body(pos, vel, 1);
 
 	atexit(SDL_Quit);
 
