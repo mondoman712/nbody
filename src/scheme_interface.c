@@ -4,15 +4,16 @@
 #include "main.h"
 #include "draw.h"
 
-static SCM clear_screen () {
+static SCM clear_screen ()
+{
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
 	SDL_RenderPresent(renderer);
 	return SCM_UNSPECIFIED;
 }
 
-static SCM draw_square 
-		(int x, int y, int w, int h, int r, int g, int b, int a) {
+static SCM draw_square (int x, int y, int w, int h, int r, int g, int b, int a)
+{
 	SDL_Rect rect;
 	rect.x = x;
 	rect.y = y;
@@ -28,7 +29,8 @@ static SCM draw_square
 	return SCM_UNSPECIFIED;
 }
 
-void* register_functions (void* data) {
+void* register_functions (void* data)
+{
 	scm_c_define_gsubr("draw-square", 8, 0, 0, &draw_square);
 	scm_c_define_gsubr("clear-screen", 0, 0, 0, &clear_screen);
 	return NULL;

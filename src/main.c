@@ -8,7 +8,8 @@
 #include "draw.h"
 #include "main.h"
 
-static void *SDL_main_loop () {
+static void *SDL_main_loop ()
+{
 	while (1) {
 		SDL_Event e;
 		if (SDL_PollEvent (&e)) {
@@ -23,7 +24,8 @@ static void *SDL_main_loop () {
 	return NULL;
 }
 
-int main (int argc, char* argv[]) {
+int main (int argc, char* argv[])
+{
 
 	int width  = DEFAULT_WIDTH;
 	int height = DEFAULT_HEIGHT;

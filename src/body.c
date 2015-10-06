@@ -3,7 +3,8 @@
 
 #include "bodydefs.h"
 
-int add_body (vector pos, vector vel, int mass) {
+int add_body (vector pos, vector vel, int mass)
+{
 	body newbod;
 	newbod.pos = pos;
 	newbod.vel = vel;
@@ -15,11 +16,13 @@ int add_body (vector pos, vector vel, int mass) {
 	return 0;
 }
 
-int vect_eq (vector vect1, vector vect2) {
+int vect_eq (vector vect1, vector vect2)
+{
 	return (vect1.x == vect2.x) && (vect1.y == vect2.y);
 }
 
-int body_eq (body bod1, body bod2) {
+int body_eq (body bod1, body bod2)
+{
 	if (vect_eq(bod1.pos, bod2.pos) &&
 			vect_eq(bod1.vel, bod2.vel) &&
 			bod1.mass == bod2.mass)
@@ -30,7 +33,8 @@ int body_eq (body bod1, body bod2) {
 /*
  * exact version of pow, for when the exponent is an integer.
  */
-double expow (double x, int y) {
+double expow (double x, int y)
+{
 	if (y == 0)
 		return 1;
 	else if (y == 1)
@@ -51,7 +55,8 @@ double expow (double x, int y) {
 /*
  * Calculates the distance between 2 vectors
  */
-double distance (vector pos1, vector pos2) {
+double distance (vector pos1, vector pos2)
+{
 	double a, b;
 
 	a = expow(abs(pos1.x - pos2.x), 2);
@@ -60,7 +65,8 @@ double distance (vector pos1, vector pos2) {
 	return sqrt(a + b);
 }
 
-void update_body (body* bod) {
+void update_body (body* bod)
+{
 	body* inc = firstbod;
 
 	while (inc) {
