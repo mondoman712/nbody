@@ -10,9 +10,14 @@ int add_body (vector pos, vector vel, int mass)
 	newbod.vel = vel;
 	newbod.mass = mass;
 
-	if (!lastbod || !lastbod->nextbod) return -1;
+	if (!firstbod)
+		firstbod = &newbod;
 
-	lastbod->nextbod = &newbod;
+	if (lastbod)
+		lastbod->nextbod = &newbod;
+
+	lastbod = &newbod;
+
 	return 0;
 }
 
@@ -65,6 +70,7 @@ double distance (vector pos1, vector pos2)
 	return sqrt(a + b);
 }
 
+/*
 void update_body (body* bod)
 {
 	body* inc = firstbod;
@@ -77,3 +83,4 @@ void update_body (body* bod)
 
 	
 }
+*/
