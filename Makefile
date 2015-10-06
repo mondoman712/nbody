@@ -11,8 +11,8 @@ BODY = src/body.c src/body.h
 BODYDEFS = src/bodydefs.h
 
 nbody: main.o scheme_interface.o draw.o body.o
-	$(CC) $(LDFLAGS) -o nbody main.o scheme_interface.o
-	rm main.o scheme_interface.o
+	$(CC) $(LDFLAGS) -o nbody main.o scheme_interface.o body.o
+	rm main.o scheme_interface.o body.o
 
 main.o: $(MAIN) $(SCHEME_INTERFACE) 
 	$(CC) $(CFLAGS) $(GUILE_CFLAGS) $(SDL_CFLAGS) src/main.c
@@ -20,10 +20,10 @@ main.o: $(MAIN) $(SCHEME_INTERFACE)
 scheme_interface.o: $(MAIN) $(SCHEME_INTERFACE) $(DRAW)
 	$(CC) $(CFLAGS) $(GUILE_CFLAGS) $(SDL_CFLAGS) src/scheme_interface.c
 
-draw.o: $(MAIN) $(DRAW)
-	$(CC) $(CFLAGS) $(SDL_CFLAGS) src/draw.c
+#draw.o: $(MAIN) $(DRAW)
+#	$(CC) $(CFLAGS) $(SDL_CFLAGS) src/draw.c
 
 body.o: $(BODYDEFS) $(BODY)
 	$(CC) $(CFLAGS) src/body.c
 clean:
-	rm main.o scheme_interface.o nbody
+	rm main.o scheme_interface.o body.o nbody
