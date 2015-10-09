@@ -33,6 +33,7 @@ struct body bodies[2];
  * Temporary function to populate the system
  */
 void populate_bodies () {
+	/*
 	int i;
 	int bodies_length = sizeof(bodies)/sizeof(struct body);
 
@@ -41,8 +42,23 @@ void populate_bodies () {
 		bodies[i].pos.y = i * 100;
 		bodies[i].vel.x = 0;
 		bodies[i].vel.y = 0;
-		bodies[i].mass = 100000;
+		bodies[i].mass = 1000000;
 	}
+	*/
+
+	int mass = 10000000;
+
+	bodies[0].pos.x = -100;
+	bodies[0].pos.y = 0;
+	bodies[0].vel.x = 0;
+	bodies[0].vel.y = 0.0000001;
+	bodies[0].mass = mass;
+
+	bodies[1].pos.x = 100;
+	bodies[1].pos.y = 0;
+	bodies[1].vel.x = 0;
+	bodies[1].vel.y = -0.0000001;
+	bodies[1].mass = mass;
 }
 
 /*
@@ -59,16 +75,21 @@ void update_bodies ()
 
 			_F = G * bodies[i].mass * bodies[j].mass;
 
-			r_x = abs(bodies[i].pos.x - bodies[j].pos.x);
-			r_y = abs(bodies[i].pos.y - bodies[j].pos.y);
+			if ((r_x = fabs(bodies[i].pos.x - bodies[j].pos.x)))
+				F_x = _F / pow(r_x, 2);
+			else
+				F_x = 0;
 
-			F_x = _F / pow(r_x, 2);
-			F_y = _F / pow(r_y, 2);
+			if ((r_y = fabs(bodies[i].pos.y - bodies[j].pos.y)))
+				F_y = _F / pow(r_y, 2);
+
+			else
+				F_y = 0;
 
 			bodies[i].vel.x += F_x / bodies[i].mass;
 			bodies[i].vel.y += F_y / bodies[i].mass;
-			bodies[j].vel.x += F_x / bodies[j].mass;
-			bodies[j].vel.y += F_y / bodies[j].mass;
+			bodies[j].vel.x -= F_x / bodies[j].mass;
+			bodies[j].vel.y -= F_y / bodies[j].mass;
 		}
 	}
 
@@ -86,12 +107,17 @@ void SDL_main_loop ()
 			if (e.type == SDL_QUIT)
 				break;
 
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+		SDL_RenderClear(renderer);
+
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
 		int i;
 		double pos_x, pos_y;
 		int bodies_length = sizeof(bodies)/sizeof(struct body);
 		for (i = 0; i < bodies_length; i++) {
 			pos_x = (width / 2) + bodies[i].pos.x;
-			pos_y = (width / 2) - bodies[i].pos.y;
+			pos_y = (height / 2) - bodies[i].pos.y;
 			SDL_RenderDrawPoint(renderer, pos_x, pos_y);
 		}
 
@@ -111,19 +137,15 @@ int main(int argc, const char *argv[])
 			"nbody",
 			SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED,
-			1024,
-			768,
+			width,
+			height,
 			0);
 
 	renderer = SDL_CreateRenderer(window, -1, 0);
 
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-	SDL_RenderClear(renderer);
 	SDL_RenderPresent(renderer);
 
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
-
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
 	SDL_main_loop();
 
