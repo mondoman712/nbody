@@ -1,9 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <unistd.h>
 #include <SDL2/SDL.h>
 
-#define G 6.67408e-11
+//#define G 6.67408e-11
+#define G 6.67408e-2
 #define DEFAULT_WIDTH 1024
 #define DEFAULT_HEIGHT 768
 
@@ -14,8 +16,8 @@ SDL_Window *window;
 SDL_Renderer *renderer;
 
 struct vector {
-	double x;
-	double y;
+	long double x;
+	long double y;
 };
 
 struct body {
@@ -23,6 +25,8 @@ struct body {
 	struct vector vel;
 	unsigned int mass;
 };
+
+int count = 0;
 
 /*
  * Initialize the array, temporarily at 8 bodies, until I set up the inputs.
@@ -46,18 +50,18 @@ void populate_bodies () {
 	}
 	*/
 
-	int mass = 10000000;
+	unsigned int mass = 1;
 
 	bodies[0].pos.x = -100;
 	bodies[0].pos.y = 0;
 	bodies[0].vel.x = 0;
-	bodies[0].vel.y = 0.0000001;
+	bodies[0].vel.y = 0.01;
 	bodies[0].mass = mass;
 
 	bodies[1].pos.x = 100;
 	bodies[1].pos.y = 0;
 	bodies[1].vel.x = 0;
-	bodies[1].vel.y = -0.0000001;
+	bodies[1].vel.y = -0.01;
 	bodies[1].mass = mass;
 }
 
@@ -68,20 +72,20 @@ void update_bodies ()
 {
 	int i, j;
 	int bodies_length = sizeof(bodies)/sizeof(struct body);
-	double _F, r_x, r_y, F_x, F_y;
+	long double _F, r_x, r_y, F_x, F_y;
 
 	for (i = 0; i < (bodies_length - 1); i++) {
 		for (j = (i + 1); j < bodies_length; j++) {
 
 			_F = G * bodies[i].mass * bodies[j].mass;
 
-			if ((r_x = fabs(bodies[i].pos.x - bodies[j].pos.x)))
-				F_x = _F / pow(r_x, 2);
+			if ((r_x = fabsl(bodies[i].pos.x - bodies[j].pos.x)))
+				F_x = _F / powl(r_x, 2);
 			else
 				F_x = 0;
 
-			if ((r_y = fabs(bodies[i].pos.y - bodies[j].pos.y)))
-				F_y = _F / pow(r_y, 2);
+			if ((r_y = fabsl(bodies[i].pos.y - bodies[j].pos.y)))
+				F_y = _F / powl(r_y, 2);
 
 			else
 				F_y = 0;
@@ -113,7 +117,7 @@ void SDL_main_loop ()
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
 		int i;
-		double pos_x, pos_y;
+		long double pos_x, pos_y;
 		int bodies_length = sizeof(bodies)/sizeof(struct body);
 		for (i = 0; i < bodies_length; i++) {
 			pos_x = (width / 2) + bodies[i].pos.x;
@@ -122,6 +126,9 @@ void SDL_main_loop ()
 		}
 
 		update_bodies();
+		count++;
+
+		usleep(3000);
 
 		SDL_RenderPresent(renderer);
 	}
@@ -166,12 +173,14 @@ int main(int argc, const char *argv[])
 	*/
 
 	for (i = 0; i < bodies_length; i++) {
-		printf("Final X Pos: %f, ", bodies[i].pos.x);
-		printf("Final Y Pos: %f, ", bodies[i].pos.y);
-		printf("Final X Vel: %f, ", bodies[i].vel.x);
-		printf("Final Y Vel: %f, ", bodies[i].vel.y);
+		printf("Final X Pos: %Lf, ", bodies[i].pos.x);
+		printf("Final Y Pos: %Lf, ", bodies[i].pos.y);
+		printf("Final X Vel: %Lf, ", bodies[i].vel.x);
+		printf("Final Y Vel: %Lf, ", bodies[i].vel.y);
 		printf("Mass: %i\n", bodies[i].mass);
 	}
+
+	printf("Count: %i\n", count);
 	
 	return 0;
 }
