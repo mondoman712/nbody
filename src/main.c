@@ -12,9 +12,6 @@
 int width = DEFAULT_WIDTH;
 int height = DEFAULT_HEIGHT;
 
-SDL_Window *window;
-SDL_Renderer *renderer;
-
 struct vector {
 	long double x;
 	long double y;
@@ -31,7 +28,7 @@ int count = 0;
 /*
  * Initialize the array, temporarily at 8 bodies, until I set up the inputs.
  */
-struct body bodies[2];
+struct body bodies[3];
 
 /*
  * Temporary function to populate the system
@@ -55,14 +52,20 @@ void populate_bodies () {
 	bodies[0].pos.x = -100;
 	bodies[0].pos.y = 0;
 	bodies[0].vel.x = 0;
-	bodies[0].vel.y = 0.01;
+	bodies[0].vel.y = 0;
 	bodies[0].mass = mass;
 
 	bodies[1].pos.x = 100;
 	bodies[1].pos.y = 0;
 	bodies[1].vel.x = 0;
-	bodies[1].vel.y = -0.01;
+	bodies[1].vel.y = 0;
 	bodies[1].mass = mass;
+
+	bodies[2].pos.x = 0;
+	bodies[2].pos.y = 100;
+	bodies[2].vel.x = 0;
+	bodies[2].vel.y = 0;
+	bodies[2].mass = mass;
 }
 
 /*
@@ -103,40 +106,14 @@ void update_bodies ()
 	}
 }
 
-void SDL_main_loop ()
+void rendering_loop()
 {
-	while (1) {
-		SDL_Event e;
-		if (SDL_PollEvent(&e))
-			if (e.type == SDL_QUIT)
-				break;
+	SDL_Window *window;
+	SDL_Renderer *renderer;
 
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-		SDL_RenderClear(renderer);
-
-		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-
-		int i;
-		long double pos_x, pos_y;
-		int bodies_length = sizeof(bodies)/sizeof(struct body);
-		for (i = 0; i < bodies_length; i++) {
-			pos_x = (width / 2) + bodies[i].pos.x;
-			pos_y = (height / 2) - bodies[i].pos.y;
-			SDL_RenderDrawPoint(renderer, pos_x, pos_y);
-		}
-
-		update_bodies();
-		count++;
-
-		usleep(3000);
-
-		SDL_RenderPresent(renderer);
-	}
-}
-
-int main(int argc, const char *argv[])
-{
-	populate_bodies();
+	int i;
+	long double pos_x, pos_y;
+	int bodies_length = sizeof(bodies)/sizeof(struct body);
 
 	SDL_Init(SDL_INIT_VIDEO);
 
@@ -154,7 +131,37 @@ int main(int argc, const char *argv[])
 
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 
-	SDL_main_loop();
+	while (1) {
+		SDL_Event e;
+		if (SDL_PollEvent(&e))
+			if (e.type == SDL_QUIT)
+				break;
+
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+		SDL_RenderClear(renderer);
+
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+		for (i = 0; i < bodies_length; i++) {
+			pos_x = (width / 2) + bodies[i].pos.x;
+			pos_y = (height / 2) - bodies[i].pos.y;
+			SDL_RenderDrawPoint(renderer, pos_x, pos_y);
+		}
+
+		update_bodies();
+		count++;
+
+		usleep(5000);
+
+		SDL_RenderPresent(renderer);
+	}
+}
+
+int main(int argc, const char *argv[])
+{
+	populate_bodies();
+
+	rendering_loop();
 
 	int i;
 	int bodies_length = sizeof(bodies)/sizeof(struct body);
