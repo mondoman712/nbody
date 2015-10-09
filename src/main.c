@@ -2,13 +2,12 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <SDL2/SDL.h>
-#include <libguile.h>
 
-#include "scheme_interface.h"
-#include "draw.h"
-#include "main.h"
-#include "bodydefs.h"
-#include "body.h"
+#define DEFAULT_WIDTH 1024
+#define DEFAULT_HEIGHT 768
+
+SDL_Window *window;
+SDL_Renderer *renderer;
 
 void *SDL_main_loop ()
 {
@@ -77,26 +76,6 @@ int main (int argc, char* argv[])
 		printf("error: %s\n", SDL_GetError());
 		return 1;
 	}
-
-	scm_with_guile(&register_functions, NULL);
-	scm_shell(argc, argv);
-
-	SDL_main_loop();
-
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-
-	vector pos;
-	pos.x = 100;
-	pos.y = 100;
-	vector vel;
-	vel.x = 0;
-	vel.y = 12;
-
-	body *firstbod = NULL;
-	body *lastbod = NULL;
-
-	add_body(pos, vel, 1);
 
 	atexit(SDL_Quit);
 
