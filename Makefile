@@ -1,8 +1,12 @@
 CC = gcc
+
+#GUILE_CFLAGS = `guile-config compile`
+#SDL_CFLAGS = $(shell sdl2-config --cflags)
 CFLAGS = -c -Wall
-GUILE_CFLAGS = `guile-config compile`
-SDL_CFLAGS = $(shell sdl2-config --cflags)
-LDFLAGS = -g -lm $(shell sdl2-config --libs) `guile-config link` 
+
+#GUILE_LDFLAGS = `guile-config link`
+#SDL_LDFLAGS = $(shell sdl2-config --libs)
+LDFLAGS = -g -lm
 
 MAIN = src/main.c
 
