@@ -133,8 +133,7 @@ void rendering_loop()
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 
 	while (1) {
-		if (SDL_PollEvent(&e))
-			if (e.type == SDL_QUIT)
+		if (SDL_PollEvent(&e) && (e.type == SDL_QUIT))
 				break;
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
