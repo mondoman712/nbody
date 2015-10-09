@@ -18,4 +18,4 @@ main.o: $(MAIN) $(SCHEME_INTERFACE)
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) src/main.c
 
 clean:
-	rm main.o scheme_interface.o body.o nbody
+	rm main.o nbody

@@ -110,6 +110,7 @@ void rendering_loop()
 {
 	SDL_Window *window;
 	SDL_Renderer *renderer;
+	SDL_Event e;
 
 	int i;
 	long double pos_x, pos_y;
@@ -132,7 +133,6 @@ void rendering_loop()
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 
 	while (1) {
-		SDL_Event e;
 		if (SDL_PollEvent(&e))
 			if (e.type == SDL_QUIT)
 				break;
