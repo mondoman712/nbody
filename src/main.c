@@ -4,8 +4,7 @@
 #include <unistd.h>
 #include <SDL2/SDL.h>
 
-//#define G 6.67408e-11
-#define G 6.67408e-2L
+#define G 6.67408e-11L
 #define DEFAULT_WIDTH 1024
 #define DEFAULT_HEIGHT 768
 
@@ -47,18 +46,18 @@ void populate_bodies () {
 	}
 	*/
 
-	unsigned int mass = 10;
+	unsigned int mass = 10000000;
 
-	bodies[0].pos.x = -100;
+	bodies[0].pos.x = -200;
 	bodies[0].pos.y = 0;
 	bodies[0].vel.x = 0;
-	bodies[0].vel.y = 0.01;
+	bodies[0].vel.y = 0.2;
 	bodies[0].mass = mass;
 
-	bodies[1].pos.x = 100;
+	bodies[1].pos.x = 200;
 	bodies[1].pos.y = 0;
 	bodies[1].vel.x = 0;
-	bodies[1].vel.y = 0;
+	bodies[1].vel.y = -0.2;
 	bodies[1].mass = mass;
 }
 
@@ -69,30 +68,26 @@ void update_bodies ()
 {
 	int i, j;
 	int bodies_length = sizeof(bodies)/sizeof(struct body);
-	long double _F, r_x, r_y, F_x, F_y;
+	long double F, r_x, r_y, F_x, F_y, r_x2, r_y2;
 
 	for (i = 0; i < (bodies_length - 1); i++) {
 		for (j = (i + 1); j < bodies_length; j++) {
 
-			_F = G * bodies[i].mass * bodies[j].mass;
+			F = G * bodies[i].mass * bodies[j].mass;
+			r_x = bodies[i].pos.x - bodies[j].pos.x;
+			r_y = bodies[i].pos.y - bodies[j].pos.y;
+
+			r_x2 = powl(r_x, 2);
+			r_y2 = powl(r_x, 2);
+			F = F / (sqrtl(r_x2 + r_y2));
 			
-			r_x = fabsl(bodies[i].pos.x - bodies[j].pos.x);
-			if (r_x != 0) {
-				F_x = _F / powl(r_x, 2);
-				bodies[i].vel.x += F_x / bodies[i].mass;
-				bodies[j].vel.x -= F_x / bodies[j].mass;
-			}
+			F_x = F * r_x;
+			bodies[i].vel.x -= F_x / bodies[i].mass;
+			bodies[j].vel.x += F_x / bodies[j].mass;
 
-			r_y = fabsl(bodies[i].pos.y - bodies[j].pos.y);
-			if (r_y != 0) {
-				F_y = _F / powl(r_y, 2);
-				bodies[i].vel.y += F_y / bodies[i].mass;
-				bodies[j].vel.y -= F_y / bodies[j].mass;
-			}
-
-			printf("Body %i and Body %i; ", i, j);
-			printf("_F = %Le, r_x = %Le, r_y = %Le\n", _F, r_x, r_y);
-			printf(" 	powl(r_y, 2) = %Le\n", powl(r_y, 2));
+			F_y = F * r_y;
+			bodies[i].vel.y -= F_y / bodies[i].mass;
+			bodies[j].vel.y += F_y / bodies[j].mass;
 		}
 	}
 
@@ -153,13 +148,15 @@ int main(int argc, const char *argv[])
 {
 	populate_bodies();
 
-	//rendering_loop();
+	rendering_loop();
 
 	int i;
 	int bodies_length = sizeof(bodies)/sizeof(struct body);
 
+	/*
 	for (i = 0; i <= 10; i++)
 		update_bodies();
+	*/
 
 	for (i = 0; i < bodies_length; i++) {
 		printf("Final X Pos: %Lf, ", bodies[i].pos.x);
