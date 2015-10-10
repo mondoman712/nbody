@@ -54,7 +54,7 @@ void populate_bodies () {
 /*
  * Updates the positions and then velocities of all the bodies in the system
  */
-void update_bodies ()
+static int update_bodies ()
 {
 	int i, j;
 	int bodies_length = sizeof(bodies)/sizeof(struct body);
@@ -85,9 +85,11 @@ void update_bodies ()
 		bodies[i].pos.x += (bodies[i].vel.x * TIME_SCALE);
 		bodies[i].pos.y += (bodies[i].vel.y * TIME_SCALE);
 	}
+
+	return 0;
 }
 
-void rendering_loop()
+static int rendering_loop()
 {
 	SDL_Window *window;
 	SDL_Renderer *renderer;
@@ -97,7 +99,7 @@ void rendering_loop()
 	long double pos_x, pos_y;
 	int bodies_length = sizeof(bodies)/sizeof(struct body);
 
-	SDL_Init(SDL_INIT_VIDEO);
+	if (SDL_Init(SDL_INIT_VIDEO)) return 1;
 
 	window = SDL_CreateWindow(
 			"nbody",
@@ -125,11 +127,13 @@ void rendering_loop()
 			SDL_RenderDrawPoint(renderer, pos_x, pos_y);
 		}
 
-		update_bodies();
+		if (update_bodies()) return 1;
 		count++;
 
 		SDL_RenderPresent(renderer);
 	}
+
+	return 0;
 }
 
 int main(int argc, const char *argv[])
