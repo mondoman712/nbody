@@ -22,7 +22,7 @@ struct vector {
 struct body {
 	struct vector pos;
 	struct vector vel;
-	unsigned int mass;
+	unsigned long mass;
 };
 
 int count = 0;
@@ -30,7 +30,7 @@ int count = 0;
 /*
  * Initialize the array, temporarily at 8 bodies, until I set up the inputs.
  */
-struct body bodies[3];
+struct body bodies[2];
 
 /*
  * Temporary function to populate the system
@@ -49,7 +49,7 @@ void populate_bodies () {
 	}
 	*/
 
-	unsigned int mass = 1000000;
+	unsigned long mass = 10e10;
 
 	bodies[0].pos.x = -100000;
 	bodies[0].pos.y = 0;
@@ -62,12 +62,6 @@ void populate_bodies () {
 	bodies[1].vel.x = 0;
 	bodies[1].vel.y = 1;
 	bodies[1].mass = mass;
-
-	bodies[2].pos.x = 0;
-	bodies[2].pos.y = 0;
-	bodies[2].vel.x = 0;
-	bodies[2].vel.y = 0;
-	bodies[2].mass = mass;
 }
 
 /*
@@ -88,7 +82,7 @@ void update_bodies ()
 
 			r_x2 = powl(r_x, 2);
 			r_y2 = powl(r_x, 2);
-			F = F / (sqrtl(r_x2 + r_y2));
+			F = F / (r_x2 + r_y2);
 			
 			F_x = F * r_x;
 			bodies[i].vel.x -= F_x / bodies[i].mass;
@@ -170,7 +164,7 @@ int main(int argc, const char *argv[])
 		printf("Final Y Pos: %Lf, ", bodies[i].pos.y);
 		printf("Final X Vel: %Lf, ", bodies[i].vel.x);
 		printf("Final Y Vel: %Lf, ", bodies[i].vel.y);
-		printf("Mass: %i\n", bodies[i].mass);
+		printf("Mass: %ld\n", bodies[i].mass);
 	}
 
 	printf("Count: %i\n", count);
