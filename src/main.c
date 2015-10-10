@@ -5,6 +5,9 @@
 #include <SDL2/SDL.h>
 
 #define G 6.67408e-11L
+#define DIST_SCALE 1000
+#define TIME_SCALE 1
+
 #define DEFAULT_WIDTH 1024
 #define DEFAULT_HEIGHT 768
 
@@ -27,7 +30,7 @@ int count = 0;
 /*
  * Initialize the array, temporarily at 8 bodies, until I set up the inputs.
  */
-struct body bodies[2];
+struct body bodies[3];
 
 /*
  * Temporary function to populate the system
@@ -46,19 +49,25 @@ void populate_bodies () {
 	}
 	*/
 
-	unsigned int mass = 10000000;
+	unsigned int mass = 1000000;
 
-	bodies[0].pos.x = -200;
+	bodies[0].pos.x = -100000;
 	bodies[0].pos.y = 0;
 	bodies[0].vel.x = 0;
-	bodies[0].vel.y = 0.2;
+	bodies[0].vel.y = -1;
 	bodies[0].mass = mass;
 
-	bodies[1].pos.x = 200;
+	bodies[1].pos.x = 100000;
 	bodies[1].pos.y = 0;
 	bodies[1].vel.x = 0;
-	bodies[1].vel.y = -0.2;
+	bodies[1].vel.y = 1;
 	bodies[1].mass = mass;
+
+	bodies[2].pos.x = 0;
+	bodies[2].pos.y = 0;
+	bodies[2].vel.x = 0;
+	bodies[2].vel.y = 0;
+	bodies[2].mass = mass;
 }
 
 /*
@@ -92,8 +101,8 @@ void update_bodies ()
 	}
 
 	for (i = 0; i < bodies_length; i++) {
-		bodies[i].pos.x += bodies[i].vel.x;
-		bodies[i].pos.y += bodies[i].vel.y;
+		bodies[i].pos.x += (bodies[i].vel.x * TIME_SCALE);
+		bodies[i].pos.y += (bodies[i].vel.y * TIME_SCALE);
 	}
 }
 
@@ -130,15 +139,13 @@ void rendering_loop()
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
 		for (i = 0; i < bodies_length; i++) {
-			pos_x = (width / 2) + bodies[i].pos.x;
-			pos_y = (height / 2) - bodies[i].pos.y;
+			pos_x = (width / 2) + (bodies[i].pos.x / DIST_SCALE);
+			pos_y = (height / 2) - (bodies[i].pos.y / DIST_SCALE);
 			SDL_RenderDrawPoint(renderer, pos_x, pos_y);
 		}
 
 		update_bodies();
 		count++;
-
-		usleep(5000);
 
 		SDL_RenderPresent(renderer);
 	}
