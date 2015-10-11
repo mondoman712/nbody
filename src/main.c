@@ -146,17 +146,6 @@ int main(int argc, const char *argv[])
 
 	if (rendering_loop()) return 1;
 
-	int i;
-	int bodies_length = sizeof(bodies)/sizeof(struct body);
-
-	for (i = 0; i < bodies_length; i++) {
-		printf("Final X Pos: %Lf, ", bodies[i].pos.x);
-		printf("Final Y Pos: %Lf, ", bodies[i].pos.y);
-		printf("Final X Vel: %Lf, ", bodies[i].vel.x);
-		printf("Final Y Vel: %Lf, ", bodies[i].vel.y);
-		printf("Mass: %ld\n", bodies[i].mass);
-	}
-
 	printf("Count: %i\n", count);
 	
 	return 0;
