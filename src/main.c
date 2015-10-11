@@ -25,8 +25,6 @@ struct body {
 	unsigned long mass;
 };
 
-int count = 0;
-
 /*
  * Initialize the array, temporarily at 8 bodies, until I set up the inputs.
  */
@@ -73,6 +71,26 @@ void populate_bodies () {
 	bodies[5].vel.x = 0;
 	bodies[5].vel.y = 0;
 	bodies[5].mass = mass;
+}
+
+/*
+ * Prints each value for each body in the system in the same format it takes as
+ * input
+ */
+static int print_system ()
+{
+	int i;
+	int bodies_length = sizeof(bodies)/sizeof(struct body);
+
+	for (i = 0; i < bodies_length; i++) {
+		printf("%Lf, ", bodies[i].pos.x);
+		printf("%Lf, ", bodies[i].pos.y);
+		printf("%Lf, ", bodies[i].vel.x);
+		printf("%Lf, ", bodies[i].vel.y);
+		printf("%ld;\n", bodies[i].mass);
+	}
+
+	return 0;
 }
 
 /*
@@ -152,7 +170,6 @@ static int rendering_loop()
 		}
 
 		if (update_bodies()) return 1;
-		count++;
 
 		SDL_RenderPresent(renderer);
 	}
@@ -166,7 +183,7 @@ int main(int argc, const char *argv[])
 
 	if (rendering_loop()) return 1;
 
-	printf("Count: %i\n", count);
+	print_system();
 	
 	return 0;
 }
