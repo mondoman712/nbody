@@ -58,26 +58,25 @@ static int update_bodies ()
 {
 	int i, j;
 	int bodies_length = sizeof(bodies)/sizeof(struct body);
-	long double F, r_x, r_y, F_x, F_y, r_x2, r_y2;
+	//long double F, r_x, r_y, F_x, F_y, r_x2, r_y2;
+	long double r_x, r_y, r2, r, g_ij, g_ji;
 
 	for (i = 0; i < (bodies_length - 1); i++) {
 		for (j = (i + 1); j < bodies_length; j++) {
 
-			F = G * bodies[i].mass * bodies[j].mass;
 			r_x = bodies[i].pos.x - bodies[j].pos.x;
 			r_y = bodies[i].pos.y - bodies[j].pos.y;
 
-			r_x2 = powl(r_x, 2);
-			r_y2 = powl(r_x, 2);
-			F = F / (r_x2 + r_y2);
-			
-			F_x = F * (r_x / sqrtl(r_x2 + r_y2));
-			bodies[i].vel.x -= F_x / bodies[i].mass;
-			bodies[j].vel.x += F_x / bodies[j].mass;
+			r2 = powl(r_x, 2) + powl(r_y, 2);
+			r = sqrtl(r2);
 
-			F_y = F * (r_y / sqrtl(r_y2 + r_y2));
-			bodies[i].vel.y -= F_y / bodies[i].mass;
-			bodies[j].vel.y += F_y / bodies[j].mass;
+			g_ij = (bodies[i].mass * G) / r2;
+			g_ji = (bodies[j].mass * G) / r2;
+
+			bodies[i].vel.x -= g_ji * (r_x / r);
+			bodies[j].vel.x += g_ij * (r_x / r);
+			bodies[i].vel.y -= g_ji * (r_y / r);
+			bodies[j].vel.y += g_ij * (r_y / r);
 		}
 	}
 
