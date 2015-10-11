@@ -75,13 +75,15 @@ static int update_bodies ()
 			r2 = powl(r_x, 2) + powl(r_y, 2);
 			r = sqrtl(r2);
 
-			g_ij = (bodies[i].mass * G) / r2;
-			g_ji = (bodies[j].mass * G) / r2;
+			g_ji = (bodies[j].mass * G) / r2; // Acceleration on I
+			g_ij = (bodies[i].mass * G) / r2; // Acceleration on J
 
-			bodies[i].vel.x -= g_ji * (r_x / r);
-			bodies[j].vel.x += g_ij * (r_x / r);
-			bodies[i].vel.y -= g_ji * (r_y / r);
-			bodies[j].vel.y += g_ij * (r_y / r);
+			r_x = r_x / r; 
+			r_y = r_y / r;
+			bodies[i].vel.x -= g_ji * r_x;
+			bodies[j].vel.x += g_ij * r_x;
+			bodies[i].vel.y -= g_ji * r_y;
+			bodies[j].vel.y += g_ij * r_y;
 		}
 	}
 
