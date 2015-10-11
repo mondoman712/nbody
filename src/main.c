@@ -30,7 +30,7 @@ int count = 0;
 /*
  * Initialize the array, temporarily at 8 bodies, until I set up the inputs.
  */
-struct body bodies[2];
+struct body bodies[3];
 
 /*
  * Temporary function to populate the system
@@ -49,6 +49,12 @@ void populate_bodies () {
 	bodies[1].vel.x = 0;
 	bodies[1].vel.y = -0.003;
 	bodies[1].mass = mass;
+
+	bodies[2].pos.x = 0;
+	bodies[2].pos.y = 100;
+	bodies[2].vel.x = 0;
+	bodies[2].vel.y = 0;
+	bodies[2].mass = mass;
 }
 
 /*
@@ -58,7 +64,6 @@ static int update_bodies ()
 {
 	int i, j;
 	int bodies_length = sizeof(bodies)/sizeof(struct body);
-	//long double F, r_x, r_y, F_x, F_y, r_x2, r_y2;
 	long double r_x, r_y, r2, r, g_ij, g_ji;
 
 	for (i = 0; i < (bodies_length - 1); i++) {
@@ -139,15 +144,10 @@ int main(int argc, const char *argv[])
 {
 	populate_bodies();
 
-	rendering_loop();
+	if (rendering_loop()) return 1;
 
 	int i;
 	int bodies_length = sizeof(bodies)/sizeof(struct body);
-
-	/*
-	for (i = 0; i <= 10; i++)
-		update_bodies();
-	*/
 
 	for (i = 0; i < bodies_length; i++) {
 		printf("Final X Pos: %Lf, ", bodies[i].pos.x);
