@@ -7,8 +7,8 @@
 #include <SDL2/SDL.h>
 
 #define G 6.67408e-11L
-#define DIST_SCALE 1
-#define TIME_SCALE 1
+#define DIST_SCALE 1.0
+#define TIME_SCALE 1.0
 
 #define DEFAULT_WIDTH 1024
 #define DEFAULT_HEIGHT 768
@@ -31,7 +31,7 @@ struct body {
 /*
  * Initialize the array, temporarily at 8 bodies, until I set up the inputs.
  */
-struct body bodies[6];
+struct body bodies[2];
 
 /*
  * Temporary function to populate the system
@@ -39,41 +39,17 @@ struct body bodies[6];
 void populate_bodies () {
 	unsigned long mass = 10e7;
 
-	bodies[0].pos.x = -100;
+	bodies[0].pos.x = 0;
 	bodies[0].pos.y = 0;
 	bodies[0].vel.x = 0;
-	bodies[0].vel.y = 0.003;
-	bodies[0].mass = mass;
+	bodies[0].vel.y = 0;
+	bodies[0].mass = mass * 100;
 
 	bodies[1].pos.x = 100;
 	bodies[1].pos.y = 0;
 	bodies[1].vel.x = 0;
-	bodies[1].vel.y = -0.003;
+	bodies[1].vel.y = -0.08;
 	bodies[1].mass = mass;
-
-	bodies[2].pos.x = 0;
-	bodies[2].pos.y = 100;
-	bodies[2].vel.x = 0;
-	bodies[2].vel.y = 0;
-	bodies[2].mass = mass;
-
-	bodies[3].pos.x = 0;
-	bodies[3].pos.y = -200;
-	bodies[3].vel.x = 0.005;
-	bodies[3].vel.y = 0;
-	bodies[3].mass = mass;
-
-	bodies[4].pos.x = 100;
-	bodies[4].pos.y = 100;
-	bodies[4].vel.x = 0;
-	bodies[4].vel.y = 0;
-	bodies[4].mass = mass;
-
-	bodies[5].pos.x = -100;
-	bodies[5].pos.y = -100;
-	bodies[5].vel.x = 0;
-	bodies[5].vel.y = 0;
-	bodies[5].mass = mass;
 }
 
 /*
@@ -85,6 +61,7 @@ static int print_system ()
 	int i;
 	int bodies_length = sizeof(bodies)/sizeof(struct body);
 
+	printf("%f, %f\n", DIST_SCALE, TIME_SCALE);
 	for (i = 0; i < bodies_length; i++) {
 		printf("%Lf, ", bodies[i].pos.x);
 		printf("%Lf, ", bodies[i].pos.y);
