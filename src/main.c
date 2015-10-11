@@ -30,7 +30,7 @@ int count = 0;
 /*
  * Initialize the array, temporarily at 8 bodies, until I set up the inputs.
  */
-struct body bodies[3];
+struct body bodies[6];
 
 /*
  * Temporary function to populate the system
@@ -55,6 +55,24 @@ void populate_bodies () {
 	bodies[2].vel.x = 0;
 	bodies[2].vel.y = 0;
 	bodies[2].mass = mass;
+
+	bodies[3].pos.x = 0;
+	bodies[3].pos.y = -200;
+	bodies[3].vel.x = 0.005;
+	bodies[3].vel.y = 0;
+	bodies[3].mass = mass;
+
+	bodies[4].pos.x = 100;
+	bodies[4].pos.y = 100;
+	bodies[4].vel.x = 0;
+	bodies[4].vel.y = 0;
+	bodies[4].mass = mass;
+
+	bodies[5].pos.x = -100;
+	bodies[5].pos.y = -100;
+	bodies[5].vel.x = 0;
+	bodies[5].vel.y = 0;
+	bodies[5].mass = mass;
 }
 
 /*
