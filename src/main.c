@@ -190,6 +190,9 @@ static int rendering_loop()
 	return 0;
 }
 
+/*
+ * Parses the command line arguments, better here than all this being in main
+ */
 static int parse_opts (int argc, char **argv)
 {
 	int c, option_index;
@@ -204,7 +207,8 @@ static int parse_opts (int argc, char **argv)
 
 		option_index = 0;
 
-		c = getopt_long(argc, argv, "w:h:f", long_options, &option_index);
+		c = getopt_long(argc, argv, "w:h:f",
+				long_options, &option_index);
 
 		if (c == -1)
 			break;
@@ -236,6 +240,7 @@ static int parse_opts (int argc, char **argv)
 		case 'f':
 			window_flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
 			break;
+
 		case '?':
 			break;
 
