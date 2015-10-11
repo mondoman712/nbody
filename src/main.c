@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <math.h>
 #include <unistd.h>
+
+#include <getopt.h>
 #include <SDL2/SDL.h>
 
 #define G 6.67408e-11L
@@ -13,6 +15,7 @@
 
 int width = DEFAULT_WIDTH;
 int height = DEFAULT_HEIGHT;
+Uint32 window_flags = 0;
 
 struct vector {
 	long double x;
@@ -131,6 +134,9 @@ static int update_bodies ()
 	return 0;
 }
 
+/*
+ * Initializes the SDL window and runs the main loop
+ */
 static int rendering_loop()
 {
 	SDL_Window *window;
@@ -149,7 +155,7 @@ static int rendering_loop()
 			SDL_WINDOWPOS_UNDEFINED,
 			width,
 			height,
-			0);
+			window_flags);
 
 	renderer = SDL_CreateRenderer(window, -1, 0);
 	SDL_RenderPresent(renderer);
@@ -177,8 +183,67 @@ static int rendering_loop()
 	return 0;
 }
 
-int main(int argc, const char *argv[])
+static int parse_opts (int argc, char **argv)
 {
+	int c, option_index;
+
+	while(1) {
+		static struct option long_options[] = {
+			{"width", required_argument, 0, 'w'},
+			{"height", required_argument, 0, 'h'},
+			{"fullscreen", no_argument, 0, 'f'},
+			{0, 0, 0, 0}
+		};
+
+		option_index = 0;
+
+		c = getopt_long(argc, argv, "w:h:f", long_options, &option_index);
+
+		if (c == -1)
+			break;
+
+		switch (c) {
+		case 0:
+			if (long_options[option_index].flag != 0) 
+				break;
+			printf("option %s", long_options[option_index].name);
+			if(optarg) 
+				printf("with arg %s", optarg);
+			printf("\n");
+			break;
+
+		case 'w':
+			if(!(width = atoi(optarg))) {
+				printf("Option w requires int value\n");
+				return -1;
+			}
+			break;
+
+		case 'h':
+			if(!(height = atoi(optarg))) {
+				printf("Option h requires int value\n");
+				return -1;
+			}
+			break;
+
+		case 'f':
+			window_flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
+			break;
+		case '?':
+			break;
+
+		default:
+			abort();
+		}
+	}
+
+	return 0;
+}
+
+int main(int argc, char **argv)
+{
+	if (parse_opts(argc, argv)) return -1;
+
 	populate_bodies();
 
 	if (rendering_loop()) return 1;
