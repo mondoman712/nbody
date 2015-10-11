@@ -142,6 +142,7 @@ static int rendering_loop()
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 	SDL_Event e;
+	SDL_DisplayMode d;
 
 	int i;
 	long double pos_x, pos_y;
@@ -156,6 +157,12 @@ static int rendering_loop()
 			width,
 			height,
 			window_flags);
+
+	if (window_flags == SDL_WINDOW_FULLSCREEN_DESKTOP) {
+		if (SDL_GetWindowDisplayMode(window, &d)) return 1;
+		width = d.w;
+		height = d.h;
+	}
 
 	renderer = SDL_CreateRenderer(window, -1, 0);
 	SDL_RenderPresent(renderer);
