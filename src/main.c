@@ -63,11 +63,11 @@ static int print_system ()
 
 	printf("%f, %f\n", DIST_SCALE, TIME_SCALE);
 	for (i = 0; i < bodies_length; i++) {
-		printf("%Lf, ", bodies[i].pos.x);
-		printf("%Lf, ", bodies[i].pos.y);
-		printf("%Lf, ", bodies[i].vel.x);
-		printf("%Lf, ", bodies[i].vel.y);
-		printf("%ld;\n", bodies[i].mass);
+		fprintf(stdout, "%Lf, ", bodies[i].pos.x);
+		fprintf(stdout, "%Lf, ", bodies[i].pos.y);
+		fprintf(stdout, "%Lf, ", bodies[i].vel.x);
+		fprintf(stdout, "%Lf, ", bodies[i].vel.y);
+		fprintf(stdout, "%ld;\n", bodies[i].mass);
 	}
 
 	return 0;
