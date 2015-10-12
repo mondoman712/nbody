@@ -73,6 +73,9 @@ static int print_system ()
 	return 0;
 }
 
+/*
+ * Calculates the accelerations of bodies a and b and edits their velocities
+ */
 static int calc_accels (struct body *a, struct body *b) 
 {
 	long double r_x, r_y, r2, r, g_ij, g_ji;
@@ -151,9 +154,9 @@ static int rendering_loop()
 	SDL_RenderPresent(renderer);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 
-	while (1) {
-		if (SDL_PollEvent(&e) && (e.type == SDL_QUIT))
-				break;
+	while (SDL_PollEvent(&e)) {
+		if (e.type == SDL_QUIT)
+			break;
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
