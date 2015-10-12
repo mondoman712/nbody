@@ -16,6 +16,7 @@
 int width = DEFAULT_WIDTH;
 int height = DEFAULT_HEIGHT;
 Uint32 window_flags = 0;
+int exit_flag = 0;
 
 struct vector {
 	long double x;
@@ -120,6 +121,17 @@ static int update_bodies ()
 	return 0;
 }
 
+static int logic_loop()
+{
+	int start_time;
+	while(!exit_flag) {
+		start_time = SDL_GetTicks();
+		if (update_bodies()) return 1;
+		//SDL_Delay((TIME_SCALE * 1000) - (SDL_GetTicks() - start_time)); 
+	}
+	return 0;
+}
+
 /*
  * Initializes the SDL window and runs the main loop
  */
@@ -134,7 +146,7 @@ static int rendering_loop()
 	long double pos_x, pos_y;
 	int bodies_length = sizeof(bodies)/sizeof(struct body);
 
-	if (SDL_Init(SDL_INIT_VIDEO)) return 1;
+	if (SDL_Init(SDL_INIT_VIDEO || SDL_INIT_TIMER)) return 1;
 
 	window = SDL_CreateWindow(
 			"nbody",
@@ -154,9 +166,20 @@ static int rendering_loop()
 	SDL_RenderPresent(renderer);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 
+
+	SDL_Thread *loop_thread;
+	int loop_thread_return = -1;
+	loop_thread = SDL_CreateThread(logic_loop, "logic_loop", NULL);
+	if (loop_thread == NULL) {
+		fprintf(stderr, "Thread Creation Failed: %s\n", SDL_GetError());
+		return -1;
+	}
+
 	while (SDL_PollEvent(&e)) {
-		if (e.type == SDL_QUIT)
+		if (e.type == SDL_QUIT) {
+			exit_flag = 1;
 			break;
+		}
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
@@ -168,10 +191,11 @@ static int rendering_loop()
 			SDL_RenderDrawPoint(renderer, pos_x, pos_y);
 		}
 
-		if (update_bodies()) return 1;
-
 		SDL_RenderPresent(renderer);
 	}
+
+	SDL_WaitThread(loop_thread, &loop_thread_return);
+	if (loop_thread_return) return loop_thread_return;
 
 	return 0;
 }
