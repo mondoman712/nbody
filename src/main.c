@@ -73,6 +73,30 @@ static int print_system ()
 	return 0;
 }
 
+static int calc_accels (struct body *a, struct body *b) 
+{
+	long double r_x, r_y, r2, r, g_ij, g_ji;
+
+	r_x = a->pos.x - b->pos.x;
+	r_y = a->pos.y - b->pos.y;
+
+	r2 = powl(r_x, 2) + powl(r_y, 2);
+	r = sqrtl(r2);
+
+	g_ji = (b->mass * G) / r2; // Acceleration on I
+	g_ij = (a->mass * G) / r2; // Acceleration on J
+
+	r_x = r_x / r; 
+	r_y = r_y / r;
+	a->vel.x -= g_ji * r_x;
+	b->vel.x += g_ij * r_x;
+	a->vel.y -= g_ji * r_y;
+	b->vel.y += g_ij * r_y;
+
+	return 0;
+}
+
+
 /*
  * Updates the positions and then velocities of all the bodies in the system
  */
@@ -80,28 +104,10 @@ static int update_bodies ()
 {
 	int i, j;
 	int bodies_length = sizeof(bodies)/sizeof(struct body);
-	long double r_x, r_y, r2, r, g_ij, g_ji;
 
-	for (i = 0; i < (bodies_length - 1); i++) {
-		for (j = (i + 1); j < bodies_length; j++) {
-
-			r_x = bodies[i].pos.x - bodies[j].pos.x;
-			r_y = bodies[i].pos.y - bodies[j].pos.y;
-
-			r2 = powl(r_x, 2) + powl(r_y, 2);
-			r = sqrtl(r2);
-
-			g_ji = (bodies[j].mass * G) / r2; // Acceleration on I
-			g_ij = (bodies[i].mass * G) / r2; // Acceleration on J
-
-			r_x = r_x / r; 
-			r_y = r_y / r;
-			bodies[i].vel.x -= g_ji * r_x;
-			bodies[j].vel.x += g_ij * r_x;
-			bodies[i].vel.y -= g_ji * r_y;
-			bodies[j].vel.y += g_ij * r_y;
-		}
-	}
+	for (i = 0; i < (bodies_length - 1); i++)
+		for (j = (i + 1); j < bodies_length; j++)
+			if (calc_accels(&bodies[i], &bodies[j])) return -1;
 
 	for (i = 0; i < bodies_length; i++) {
 		bodies[i].pos.x += (bodies[i].vel.x * TIME_SCALE);
