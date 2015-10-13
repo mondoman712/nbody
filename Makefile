@@ -2,7 +2,7 @@ CC = gcc
 
 #GUILE_CFLAGS = `guile-config compile`
 SDL_CFLAGS = $(shell sdl2-config --cflags)
-CFLAGS = -c -Wall
+CFLAGS = -c -W -Wall -Werror
 
 #GUILE_LDFLAGS = `guile-config link`
 SDL_LDFLAGS = $(shell sdl2-config --libs)
