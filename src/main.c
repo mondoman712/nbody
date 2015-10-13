@@ -33,6 +33,7 @@ struct body {
 /*
  * Return a random number between 0 and limit
  */
+/*
 static int rand_lim (int limit)
 {
 	int divisor = RAND_MAX /(limit + 1);
@@ -44,13 +45,14 @@ static int rand_lim (int limit)
 
 	return retval;
 }
+*/
 
 /*
  * Temporary function to populate the system
  */
 void populate_bodies (int bodies_length, struct body *bodies) {
 	unsigned long mass = 10e7;
-
+	bodies_length += 1;
 	bodies[0].pos.x = 0;
 	bodies[0].pos.y = 0;
 	bodies[0].vel.x = 0;
@@ -130,16 +132,18 @@ static int update_bodies (int bodies_length, struct body *bodies)
 	return 0;
 }
 
+/*
 static int logic_loop(int bodies_length, struct body *bodies)
 {
-	int start_time;
+//	int start_time;
 	while(!exit_flag) {
-		start_time = SDL_GetTicks();
+//		start_time = SDL_GetTicks();
 		if (update_bodies(bodies_length, bodies)) return 1;
-		//SDL_Delay((TIME_SCALE * 1000) - (SDL_GetTicks() - start_time)); 
+//		SDL_Delay((TIME_SCALE * 1000) - (SDL_GetTicks() - start_time)); 
 	}
 	return 0;
 }
+*/
 
 /*
  * Initializes the SDL window and runs the main loop
