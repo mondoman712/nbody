@@ -12,7 +12,6 @@
 
 #define DEFAULT_WIDTH 1024
 #define DEFAULT_HEIGHT 768
-#define DEFAULT_BOD_NUM 2
 
 int width = DEFAULT_WIDTH;
 int height = DEFAULT_HEIGHT;
@@ -31,24 +30,14 @@ struct body {
 };
 
 /*
- * Return a random number between 0 and limit
+ * Initialize the array, temporarily at 8 bodies, until I set up the inputs.
  */
-static int rand_lim (int limit)
-{
-	int divisor = RAND_MAX /(limit + 1);
-	int retval;
-
-	do
-		retval = rand() / divisor;
-	while (retval > limit);
-
-	return retval;
-}
+struct body bodies[2];
 
 /*
  * Temporary function to populate the system
  */
-void populate_bodies (int bodies_length, struct body *bodies) {
+void populate_bodies () {
 	unsigned long mass = 10e7;
 
 	bodies[0].pos.x = 0;
@@ -68,9 +57,10 @@ void populate_bodies (int bodies_length, struct body *bodies) {
  * Prints each value for each body in the system in the same format it takes as
  * input
  */
-static int print_system (int bodies_length, struct body *bodies)
+static int print_system ()
 {
 	int i;
+	int bodies_length = sizeof(bodies)/sizeof(struct body);
 
 	printf("%f, %f\n", DIST_SCALE, TIME_SCALE);
 	for (i = 0; i < bodies_length; i++) {
@@ -114,9 +104,10 @@ static int calc_accels (struct body *a, struct body *b)
 /*
  * Updates the positions and then velocities of all the bodies in the system
  */
-static int update_bodies (int bodies_length, struct body *bodies)
+static int update_bodies ()
 {
 	int i, j;
+	int bodies_length = sizeof(bodies)/sizeof(struct body);
 
 	for (i = 0; i < (bodies_length - 1); i++)
 		for (j = (i + 1); j < bodies_length; j++)
@@ -130,12 +121,12 @@ static int update_bodies (int bodies_length, struct body *bodies)
 	return 0;
 }
 
-static int logic_loop(int bodies_length, struct body *bodies)
+static int logic_loop()
 {
 	int start_time;
 	while(!exit_flag) {
 		start_time = SDL_GetTicks();
-		if (update_bodies(bodies_length, bodies)) return 1;
+		if (update_bodies()) return 1;
 		//SDL_Delay((TIME_SCALE * 1000) - (SDL_GetTicks() - start_time)); 
 	}
 	return 0;
@@ -144,7 +135,7 @@ static int logic_loop(int bodies_length, struct body *bodies)
 /*
  * Initializes the SDL window and runs the main loop
  */
-static int rendering_loop(int bodies_length, struct body *bodies)
+static int rendering_loop()
 {
 	SDL_Window *window;
 	SDL_Renderer *renderer;
@@ -153,6 +144,7 @@ static int rendering_loop(int bodies_length, struct body *bodies)
 
 	int i;
 	long double pos_x, pos_y;
+	int bodies_length = sizeof(bodies)/sizeof(struct body);
 
 	if (SDL_Init(SDL_INIT_VIDEO || SDL_INIT_TIMER)) return 1;
 
@@ -175,7 +167,6 @@ static int rendering_loop(int bodies_length, struct body *bodies)
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 
 
-	/*
 	SDL_Thread *loop_thread;
 	int loop_thread_return = -1;
 	loop_thread = SDL_CreateThread(logic_loop, "logic_loop", NULL);
@@ -183,7 +174,6 @@ static int rendering_loop(int bodies_length, struct body *bodies)
 		fprintf(stderr, "Thread Creation Failed: %s\n", SDL_GetError());
 		return -1;
 	}
-	*/
 
 	while (SDL_PollEvent(&e)) {
 		if (e.type == SDL_QUIT) {
@@ -201,13 +191,11 @@ static int rendering_loop(int bodies_length, struct body *bodies)
 			SDL_RenderDrawPoint(renderer, pos_x, pos_y);
 		}
 
-		if (update_bodies(bodies_length, bodies)) return 1;
-
 		SDL_RenderPresent(renderer);
 	}
 
-	//SDL_WaitThread(loop_thread, &loop_thread_return);
-	//if (loop_thread_return) return loop_thread_return;
+	SDL_WaitThread(loop_thread, &loop_thread_return);
+	if (loop_thread_return) return loop_thread_return;
 
 	return 0;
 }
@@ -215,7 +203,7 @@ static int rendering_loop(int bodies_length, struct body *bodies)
 /*
  * Parses the command line arguments, better here than all this being in main
  */
-static int parse_opts (int argc, char **argv, int *bodies_init_length)
+static int parse_opts (int argc, char **argv)
 {
 	int c, option_index;
 
@@ -229,7 +217,7 @@ static int parse_opts (int argc, char **argv, int *bodies_init_length)
 
 		option_index = 0;
 
-		c = getopt_long(argc, argv, "w:h:fn:",
+		c = getopt_long(argc, argv, "w:h:f",
 				long_options, &option_index);
 
 		if (c == -1)
@@ -263,12 +251,6 @@ static int parse_opts (int argc, char **argv, int *bodies_init_length)
 			window_flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
 			break;
 
-		case 'n':
-			if(!(*bodies_init_length = atoi(optarg))) {
-				printf("Option n requires int value\n");
-				return -1;
-			}
-			break;
 		case '?':
 			break;
 
@@ -282,16 +264,13 @@ static int parse_opts (int argc, char **argv, int *bodies_init_length)
 
 int main(int argc, char **argv)
 {
-	int bodies_init_length = DEFAULT_BOD_NUM;
+	if (parse_opts(argc, argv)) return -1;
 
-	if (parse_opts(argc, argv, &bodies_init_length)) return -1;
-	struct body bodies[bodies_init_length];
+	populate_bodies();
 
-	populate_bodies(bodies_init_length, &bodies[bodies_init_length]);
+	if (rendering_loop()) return 1;
 
-	if (rendering_loop(bodies_init_length, &bodies[bodies_init_length])) return 1;
-
-	print_system(bodies_init_length, &bodies[bodies_init_length]);
+	print_system();
 	
 	return 0;
 }
