@@ -29,14 +29,9 @@ struct body {
 };
 
 /*
- * Initialize the array, temporarily at 8 bodies, until I set up the inputs.
- */
-struct body bodies[2];
-
-/*
  * Temporary function to populate the system
  */
-void populate_bodies () {
+static int populate_bodies (struct body *bodies) {
 	unsigned long mass = 10e7;
 
 	bodies[0].pos.x = 0;
@@ -50,18 +45,19 @@ void populate_bodies () {
 	bodies[1].vel.x = 0;
 	bodies[1].vel.y = -0.08;
 	bodies[1].mass = mass;
+
+	return 0;
 }
 
 /*
  * Prints each value for each body in the system in the same format it takes as
  * input
  */
-static int print_system ()
+static int print_system (struct body *bodies, int bodies_length)
 {
 	int i;
-	int bodies_length = sizeof(bodies)/sizeof(struct body);
 
-	printf("%f, %f\n", DIST_SCALE, TIME_SCALE);
+	fprintf(stdout, "%f, %f\n", DIST_SCALE, TIME_SCALE);
 	for (i = 0; i < bodies_length; i++) {
 		fprintf(stdout, "%Lf, ", bodies[i].pos.x);
 		fprintf(stdout, "%Lf, ", bodies[i].pos.y);
@@ -103,10 +99,9 @@ static int calc_accels (struct body *a, struct body *b)
 /*
  * Updates the positions and then velocities of all the bodies in the system
  */
-static int update_bodies ()
+static int update_bodies (struct body *bodies, int bodies_length)
 {
 	int i, j;
-	int bodies_length = sizeof(bodies)/sizeof(struct body);
 
 	for (i = 0; i < (bodies_length - 1); i++)
 		for (j = (i + 1); j < bodies_length; j++)
@@ -123,7 +118,7 @@ static int update_bodies ()
 /*
  * Initializes the SDL window and runs the main loop
  */
-static int rendering_loop()
+static int rendering_loop(struct body *bodies, int bodies_length)
 {
 	SDL_Window *window;
 	SDL_Renderer *renderer;
@@ -132,17 +127,22 @@ static int rendering_loop()
 
 	int i;
 	long double pos_x, pos_y;
-	int bodies_length = sizeof(bodies)/sizeof(struct body);
 
-	if (SDL_Init(SDL_INIT_VIDEO)) return 1;
+	if (SDL_Init(SDL_INIT_VIDEO)) {
+		fprintf(stderr, "SDL not Initialized\n");
+		return 1;
+	}
 
-	window = SDL_CreateWindow(
+	if ((window = SDL_CreateWindow(
 			"nbody",
 			SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED,
 			width,
 			height,
-			window_flags);
+			window_flags))) {
+		fprintf(stderr, "Failed to create window: %s\n", SDL_GetError());
+		return 1;
+	}
 
 	if (window_flags == SDL_WINDOW_FULLSCREEN_DESKTOP) {
 		if (SDL_GetWindowDisplayMode(window, &d)) return 1;
@@ -155,8 +155,10 @@ static int rendering_loop()
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 
 	while (SDL_PollEvent(&e)) {
-		if (e.type == SDL_QUIT)
+		if (e.type == SDL_QUIT) {
+			fprintf(stdout, "Exit signal recieved\n");
 			break;
+		}
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
@@ -168,10 +170,12 @@ static int rendering_loop()
 			SDL_RenderDrawPoint(renderer, pos_x, pos_y);
 		}
 
-		if (update_bodies()) return 1;
+		if (update_bodies(bodies, 2)) return 1;
 
 		SDL_RenderPresent(renderer);
 	}
+
+	SDL_DestroyWindow(window);
 
 	return 0;
 }
@@ -240,13 +244,21 @@ static int parse_opts (int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-	if (parse_opts(argc, argv)) return -1;
+	if (parse_opts(argc, argv)) {
+		fprintf(stderr, "Error at parse_opts\n");
+		return -1;
+	}
 
-	populate_bodies();
+	struct body bodies[2];
 
-	if (rendering_loop()) return 1;
+	populate_bodies(bodies);
 
-	print_system();
+	if (rendering_loop(bodies, 2)) {
+		fprintf(stderr, "Error at rendering\n");
+		return 1;
+	}
+
+	print_system(bodies, 2);
 	
 	return 0;
 }
