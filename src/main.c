@@ -13,6 +13,8 @@
 #define DEFAULT_WIDTH 1024
 #define DEFAULT_HEIGHT 768
 
+#define KEY_QUIT SDLK_q
+
 int width = DEFAULT_WIDTH;
 int height = DEFAULT_HEIGHT;
 Uint32 window_flags = 0;
@@ -28,10 +30,16 @@ struct body {
 	unsigned long mass;
 };
 
+struct bodies_wl {
+	struct body * bodies;
+	int len;
+};
+
 /*
  * Temporary function to populate the system
  */
-static int populate_bodies (struct body *bodies) {
+static int populate_bodies (struct body *bodies) 
+{
 	unsigned long mass = 10e7;
 
 	bodies[0].pos.x = 0;
@@ -158,9 +166,10 @@ static int rendering_loop(struct body *bodies, int bodies_length)
 
 	while (1) {
 		if (SDL_PollEvent(&e)) {
-			if (e.type == SDL_QUIT) break;
-			else if (e.type == SDL_KEYUP &&
-					e.key.keysym.sym == SDLK_q) break;
+			if (e.type == SDL_QUIT) 
+				break;
+			else if (e.type == SDL_KEYUP && e.key.keysym.sym == KEY_QUIT) 
+				break;
 		}
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -173,7 +182,7 @@ static int rendering_loop(struct body *bodies, int bodies_length)
 			SDL_RenderDrawPoint(renderer, pos_x, pos_y);
 		}
 
-		if (update_bodies(bodies, 2)) return 1;
+		if (update_bodies(bodies, 2)) break;
 
 		SDL_RenderPresent(renderer);
 	}
@@ -253,7 +262,6 @@ int main(int argc, char **argv)
 	}
 
 	struct body bodies[2];
-
 	populate_bodies(bodies);
 
 	if (rendering_loop(bodies, 2)) {
