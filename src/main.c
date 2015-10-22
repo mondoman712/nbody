@@ -249,7 +249,7 @@ int main(int argc, char **argv)
 {
 	if (parse_opts(argc, argv)) {
 		fprintf(stderr, "Error at parse_opts\n");
-		return -1;
+		exit(EXIT_FAILURE);
 	}
 
 	struct body bodies[2];
@@ -258,10 +258,10 @@ int main(int argc, char **argv)
 
 	if (rendering_loop(bodies, 2)) {
 		fprintf(stderr, "Error at rendering\n");
-		return 1;
+		exit(EXIT_FAILURE);
 	}
 
 	print_system(bodies, 2);
 	
-	return 0;
+	exit(EXIT_SUCCESS);
 }
