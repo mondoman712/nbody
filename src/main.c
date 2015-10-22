@@ -130,7 +130,7 @@ static int rendering_loop(struct body *bodies, int bodies_length)
 
 	if (SDL_Init(SDL_INIT_VIDEO)) {
 		fprintf(stderr, "SDL not Initialized\n");
-		exit(EXIT_FAILURE);
+		return 1;
 	}
 
 	window = SDL_CreateWindow(
@@ -143,11 +143,11 @@ static int rendering_loop(struct body *bodies, int bodies_length)
 
 	if (window == NULL) {
 		fprintf(stderr, "Failed to create window: %s\n", SDL_GetError());
-		exit(EXIT_FAILURE);
+		return 1;
 	}
 
 	if (window_flags == SDL_WINDOW_FULLSCREEN_DESKTOP) {
-		if (SDL_GetWindowDisplayMode(window, &d)) exit(EXIT_FAILURE);
+		if (SDL_GetWindowDisplayMode(window, &d)) return 1;
 		width = d.w;
 		height = d.h;
 	}
@@ -173,14 +173,14 @@ static int rendering_loop(struct body *bodies, int bodies_length)
 			SDL_RenderDrawPoint(renderer, pos_x, pos_y);
 		}
 
-		if (update_bodies(bodies, 2)) exit(EXIT_FAILURE);
+		if (update_bodies(bodies, 2)) return 1;
 
 		SDL_RenderPresent(renderer);
 	}
 
 	SDL_DestroyWindow(window);
 
-	exit(EXIT_SUCCESS);
+	return 0;
 }
 
 /*
