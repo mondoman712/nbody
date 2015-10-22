@@ -264,12 +264,12 @@ int main(int argc, char **argv)
 	struct body bodies[2];
 	populate_bodies(bodies);
 
+	print_system(bodies, 2);
+
 	if (rendering_loop(bodies, 2)) {
 		fprintf(stderr, "Error at rendering\n");
 		exit(EXIT_FAILURE);
 	}
-
-	print_system(bodies, 2);
 	
 	exit(EXIT_SUCCESS);
 }
