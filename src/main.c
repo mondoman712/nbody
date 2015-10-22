@@ -158,10 +158,9 @@ static int rendering_loop(struct body *bodies, int bodies_length)
 
 	while (1) {
 		if (SDL_PollEvent(&e)) {
-			if (e.type == SDL_QUIT) {
-				fprintf(stdout, "Exit signal recieved\n");
-				break;
-			}
+			if (e.type == SDL_QUIT) break;
+			else if (e.type == SDL_KEYUP &&
+					e.key.keysym.sym == SDLK_q) break;
 		}
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
