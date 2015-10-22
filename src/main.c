@@ -133,13 +133,15 @@ static int rendering_loop(struct body *bodies, int bodies_length)
 		return 1;
 	}
 
-	if ((window = SDL_CreateWindow(
+	window = SDL_CreateWindow(
 			"nbody",
 			SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED,
 			width,
 			height,
-			window_flags))) {
+			window_flags);
+
+	if (window == NULL) {
 		fprintf(stderr, "Failed to create window: %s\n", SDL_GetError());
 		return 1;
 	}
@@ -154,10 +156,12 @@ static int rendering_loop(struct body *bodies, int bodies_length)
 	SDL_RenderPresent(renderer);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 
-	while (SDL_PollEvent(&e)) {
-		if (e.type == SDL_QUIT) {
-			fprintf(stdout, "Exit signal recieved\n");
-			break;
+	while (1) {
+		if (SDL_PollEvent(&e)) {
+			if (e.type == SDL_QUIT) {
+				fprintf(stdout, "Exit signal recieved\n");
+				break;
+			}
 		}
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);

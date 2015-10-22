@@ -15,7 +15,7 @@ nbody: main.o
 	rm main.o
 
 main.o: $(MAIN) $(SCHEME_INTERFACE) 
-	$(CC) $(CFLAGS) $(SDL_CFLAGS) src/main.c
+	$(CC) $(CFLAGS) $(SDL_CFLAGS) $(MAIN)
 
 clean:
 	rm main.o nbody
