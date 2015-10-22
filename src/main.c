@@ -30,30 +30,47 @@ struct body {
 	unsigned long mass;
 };
 
-struct bodies_wl {
-	struct body * bodies;
-	int len;
-};
+/*
+ * Parses a single line of input into a body struct
+ */
+static long double _sparse_body (char *s, size_t l, int * start)
+{
+	int i = * start;
+	char tmp[l];
+	
+	while (s[i] != ',' || s[i] != ';' || s[i] != '\0') {
+		tmp[i] = s[i];
+		i++;
+	}
+	
+	*start = i;
+
+	return atof(tmp);
+}
+	
+static struct body sparse_body (char * body_string, size_t length)
+{
+	struct body ret;
+	int * i = 0;
+
+	ret.pos.x = _sparse_body(body_string, length, i);
+	ret.pos.y = _sparse_body(body_string, length, i);
+	ret.vel.x = _sparse_body(body_string, length, i);
+	ret.vel.y = _sparse_body(body_string, length, i);
+	ret.mass = (int)_sparse_body(body_string, length, i);
+
+	return ret;
+}
 
 /*
- * Temporary function to populate the system
+ * Parses an array of strings representing bodies into an array of body structs
  */
-static int populate_bodies (struct body *bodies) 
+static int asparse_bodies (char * s[], struct body * bodies, int length)
 {
-	unsigned long mass = 10e7;
-
-	bodies[0].pos.x = 0;
-	bodies[0].pos.y = 0;
-	bodies[0].vel.x = 0;
-	bodies[0].vel.y = 0;
-	bodies[0].mass = mass * 100;
-
-	bodies[1].pos.x = 100;
-	bodies[1].pos.y = 0;
-	bodies[1].vel.x = 0;
-	bodies[1].vel.y = -0.08;
-	bodies[1].mass = mass;
-
+	int i;
+	for (i = 1; i < length; i++)
+		bodies[i] = sparse_body(s[i], sizeof(s[i]) / sizeof(char));
+	
 	return 0;
 }
 
@@ -262,14 +279,23 @@ int main(int argc, char **argv)
 	}
 
 	struct body bodies[2];
-	populate_bodies(bodies);
+	FILE * f = fopen("tst.dat", "r");
+	if (f == NULL) {
+		fprintf(stderr, "Failed to open file: %s\n", "tst.dat");
+		exit(EXIT_FAILURE);
+	}
 
-	print_system(bodies, 2);
+	char * buff[1024];
+	fread(buff, 80 * sizeof(char), 20, f);
+
+	asparse_bodies(buff, bodies, 3);
 
 	if (rendering_loop(bodies, 2)) {
 		fprintf(stderr, "Error at rendering\n");
 		exit(EXIT_FAILURE);
 	}
+
+	print_system(bodies, 2);
 	
 	exit(EXIT_SUCCESS);
 }
