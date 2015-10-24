@@ -32,10 +32,27 @@ struct body {
 	unsigned long mass;
 };
 
+struct vector centre_of_mass (struct body * bodies, int bodies_length)
+{
+	struct vector ret = {0, 0};
+	int i, mtot;
+
+	for (i = 0; i < bodies_length; i++) {
+		ret.x += bodies[i].pos.x * bodies[i].mass;
+		ret.y += bodies[i].pos.y * bodies[i].mass;
+		mtot += bodies[i].mass;
+	}
+
+	ret.x /= mtot;
+	ret.y /= mtot;
+
+	return ret;
+}
+
 /*
  * Fills array with n bodies of random position and velocity (and maybe mass)
  */
-int genbods (int n, struct body *bodies)
+int genbods (int n, struct body * bodies)
 {
 	int i;
 	for (i = 0; i < n; i++) {
@@ -178,6 +195,10 @@ static int rendering_loop(struct body *bodies, int bodies_length)
 		}
 
 		if (update_bodies(bodies, bodies_length)) break;
+
+		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+		struct vector com = centre_of_mass(bodies, bodies_length);
+		SDL_RenderDrawPoint(renderer, com.x, com.y);
 
 		SDL_RenderPresent(renderer);
 	}
