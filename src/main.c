@@ -9,7 +9,7 @@
 
 #define G 6.67408e-11L
 #define DIST_SCALE 1.0
-#define TIME_SCALE 1.0
+#define TIME_SCALE 0.25
 
 #define DEFAULT_WIDTH 1024
 #define DEFAULT_HEIGHT 768
@@ -41,9 +41,13 @@ int genbods (int n, struct body *bodies)
 	for (i = 0; i < n; i++) {
 		bodies[i].pos.x = (rand() % width - width / 2) / DIST_SCALE;
 		bodies[i].pos.y = (rand() % height - height / 2) / DIST_SCALE;
-		bodies[i].vel.x = (rand() % 10000) / 100000.0 - 0.05;
-		bodies[i].vel.y = (rand() % 10000) / 100000.0 - 0.05;
-		bodies[i].mass = 1e8;
+		bodies[i].vel.x = (rand() % 10000) / 100000.0;
+		bodies[i].vel.y = (rand() % 10000) / 100000.0;
+
+		if (bodies[i].pos.x > 0) bodies[i].vel.y = -bodies[i].vel.y;
+		if (bodies[i].pos.y > 0) bodies[i].vel.x = -bodies[i].vel.x;
+
+		bodies[i].mass = 1e9;
 	}
 	return 0;
 }
