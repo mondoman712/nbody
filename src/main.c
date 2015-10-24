@@ -196,8 +196,11 @@ static int rendering_loop(struct body *bodies, int bodies_length)
 
 		if (update_bodies(bodies, bodies_length)) break;
 
+		/* Renders centre of mass point */
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 		struct vector com = centre_of_mass(bodies, bodies_length);
+		com.x = (width / 2) + (com.x / DIST_SCALE);
+		com.y = (height / 2) - (com.y / DIST_SCALE);
 		SDL_RenderDrawPoint(renderer, com.x, com.y);
 
 		SDL_RenderPresent(renderer);
