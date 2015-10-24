@@ -30,47 +30,40 @@ struct body {
 	unsigned long mass;
 };
 
-/*
- * Parses a single line of input into a body struct
- */
-static long double _sparse_body (char *s, size_t l, int * start)
+static int file_length (FILE * f)
 {
-	int i = * start;
-	char tmp[l];
+	char ch;
+	int lines = 0;
+	while (!feof(f)) {
+		ch = fgetc(f);
+		if (ch == 'n')
+			lines++;
+	}
+
+	return lines;
+}
+
+static int parse_file (char * filename, struct body * bodies)
+{
+	FILE * f = fopen(filename, "r");
+	if (f == NULL) {
+		fprintf(stderr, "Failed to open file: %s\n", filename);
+		return 1;
+	}
+
+	int f_len = file_length(f);
 	
-	while (s[i] != ',' || s[i] != ';' || s[i] != '\0') {
-		tmp[i] = s[i];
+	char s[80][f_len];
+	
+	fread(s, 80 * sizeof(char), f_len, f);
+
+	bodies[0].mass = 0;
+
+	int i = 0;
+	while (s != NULL) {
+		printf("%s\n", s[i]);
 		i++;
 	}
-	
-	*start = i;
-
-	return atof(tmp);
-}
-	
-static struct body sparse_body (char * body_string, size_t length)
-{
-	struct body ret;
-	int * i = 0;
-
-	ret.pos.x = _sparse_body(body_string, length, i);
-	ret.pos.y = _sparse_body(body_string, length, i);
-	ret.vel.x = _sparse_body(body_string, length, i);
-	ret.vel.y = _sparse_body(body_string, length, i);
-	ret.mass = (int)_sparse_body(body_string, length, i);
-
-	return ret;
-}
-
-/*
- * Parses an array of strings representing bodies into an array of body structs
- */
-static int asparse_bodies (char * s[], struct body * bodies, int length)
-{
-	int i;
-	for (i = 1; i < length; i++)
-		bodies[i] = sparse_body(s[i], sizeof(s[i]) / sizeof(char));
-	
 	return 0;
 }
 
@@ -279,16 +272,8 @@ int main(int argc, char **argv)
 	}
 
 	struct body bodies[2];
-	FILE * f = fopen("tst.dat", "r");
-	if (f == NULL) {
-		fprintf(stderr, "Failed to open file: %s\n", "tst.dat");
-		exit(EXIT_FAILURE);
-	}
 
-	char * buff[1024];
-	fread(buff, 80 * sizeof(char), 20, f);
-
-	asparse_bodies(buff, bodies, 3);
+	parse_file("tst.dat", bodies);
 
 	if (rendering_loop(bodies, 2)) {
 		fprintf(stderr, "Error at rendering\n");
