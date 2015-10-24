@@ -30,43 +30,6 @@ struct body {
 	unsigned long mass;
 };
 
-static int file_length (FILE * f)
-{
-	char ch;
-	int lines = 0;
-	while (!feof(f)) {
-		ch = fgetc(f);
-		if (ch == 'n')
-			lines++;
-	}
-
-	return lines;
-}
-
-static int parse_file (char * filename, struct body * bodies)
-{
-	FILE * f = fopen(filename, "r");
-	if (f == NULL) {
-		fprintf(stderr, "Failed to open file: %s\n", filename);
-		return 1;
-	}
-
-	int f_len = file_length(f);
-	
-	char s[80][f_len];
-	
-	fread(s, 80 * sizeof(char), f_len, f);
-
-	bodies[0].mass = 0;
-
-	int i = 0;
-	while (s != NULL) {
-		printf("%s\n", s[i]);
-		i++;
-	}
-	return 0;
-}
-
 /*
  * Prints each value for each body in the system in the same format it takes as
  * input
@@ -272,8 +235,6 @@ int main(int argc, char **argv)
 	}
 
 	struct body bodies[2];
-
-	parse_file("tst.dat", bodies);
 
 	if (rendering_loop(bodies, 2)) {
 		fprintf(stderr, "Error at rendering\n");
