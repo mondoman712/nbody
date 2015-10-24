@@ -1,3 +1,26 @@
+/*
+ * Nbody, A completely unscientific N body simulator written as a learning
+ * project. Started out as a simple orbit sim for my A level computing
+ * coursework, written in common lisp. I then adapted it to work as an N body
+ * simulator. Since then I have been rewriting it in C, again just as a learning
+ * experience.
+ *
+ * This program is free software; you can redistribute it and/or modify it under 
+ * the terms of the GNU General Public License as published by the Free Software 
+ * Foundation; either version 2 of the License, or (at your option) any later 
+ * version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for 
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with 
+ * this program; if not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright (C) Sam Smith, 2015
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -9,7 +32,7 @@
 
 #define G 6.67408e-11L
 #define DIST_SCALE 1.0
-#define TIME_SCALE 0.25
+#define TIME_SCALE 1.0
 
 #define DEFAULT_WIDTH 1024
 #define DEFAULT_HEIGHT 768
@@ -19,6 +42,7 @@
 int width = DEFAULT_WIDTH;
 int height = DEFAULT_HEIGHT;
 Uint32 window_flags = 0;
+int centre_flag = 0;
 unsigned int n = 2;
 
 struct vector {
@@ -56,15 +80,15 @@ int genbods (int n, struct body * bodies)
 {
 	int i;
 	for (i = 0; i < n; i++) {
-		bodies[i].pos.x = (rand() % width - width / 2) / DIST_SCALE;
-		bodies[i].pos.y = (rand() % height - height / 2) / DIST_SCALE;
-		bodies[i].vel.x = (rand() % 10000) / 100000.0;
-		bodies[i].vel.y = (rand() % 10000) / 100000.0;
+		bodies[i].pos.x = (rand() % width - (width / 2)) / DIST_SCALE;
+		bodies[i].pos.y = (rand() % height - (height / 2)) / DIST_SCALE;
+		bodies[i].vel.x = (rand() % 10000) / 1000000.0;
+		bodies[i].vel.y = (rand() % 10000) / 1000000.0;
 
 		if (bodies[i].pos.x > 0) bodies[i].vel.y = -bodies[i].vel.y;
 		if (bodies[i].pos.y > 0) bodies[i].vel.x = -bodies[i].vel.x;
 
-		bodies[i].mass = 1e9;
+		bodies[i].mass = 1e8;
 	}
 	return 0;
 }
@@ -188,19 +212,31 @@ static int rendering_loop(struct body *bodies, int bodies_length)
 		SDL_RenderClear(renderer);
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
+		struct vector com = centre_of_mass(bodies, bodies_length);
+
 		for (i = 0; i < bodies_length; i++) {
 			pos_x = (width / 2) + (bodies[i].pos.x / DIST_SCALE);
+			if (centre_flag) pos_x -= com.x;
+
 			pos_y = (height / 2) - (bodies[i].pos.y / DIST_SCALE);
+			if (centre_flag) pos_y += com.y;
+
 			SDL_RenderDrawPoint(renderer, pos_x, pos_y);
 		}
 
 		if (update_bodies(bodies, bodies_length)) break;
 
 		/* Renders centre of mass point */
+		if (centre_flag) {
+			com.x = width / 2;
+			com.y = height / 2;
+		} else {
+			com.x = (width / 2) + (com.x / DIST_SCALE);
+			com.y = (height / 2) - (com.y / DIST_SCALE);
+			SDL_RenderDrawPoint(renderer, com.x, com.y);
+		}
+
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-		struct vector com = centre_of_mass(bodies, bodies_length);
-		com.x = (width / 2) + (com.x / DIST_SCALE);
-		com.y = (height / 2) - (com.y / DIST_SCALE);
 		SDL_RenderDrawPoint(renderer, com.x, com.y);
 
 		SDL_RenderPresent(renderer);
@@ -223,12 +259,14 @@ static int parse_opts (int argc, char **argv)
 			{"width", required_argument, 0, 'w'},
 			{"height", required_argument, 0, 'h'},
 			{"fullscreen", no_argument, 0, 'f'},
+			{"generate", required_argument, 0, 'g'},
+			{"centre", no_argument, 0, 'c'},
 			{0, 0, 0, 0}
 		};
 
 		option_index = 0;
 
-		c = getopt_long(argc, argv, "w:h:fg:",
+		c = getopt_long(argc, argv, "w:h:fg:c",
 				long_options, &option_index);
 
 		if (c == -1)
@@ -267,6 +305,10 @@ static int parse_opts (int argc, char **argv)
 				fprintf(stderr, "Option n requires int value\n");
 				return -1;
 			}
+			break;
+
+		case 'c':
+			centre_flag = 1;
 			break;
 
 		case '?':
