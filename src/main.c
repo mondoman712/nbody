@@ -43,7 +43,7 @@ int width = DEFAULT_WIDTH;
 int height = DEFAULT_HEIGHT;
 Uint32 window_flags = 0;
 int centre_flag = 0;
-unsigned int n = 2;
+unsigned int n = 0;
 
 struct vector {
 	long double x;
@@ -56,6 +56,9 @@ struct body {
 	unsigned long mass;
 };
 
+/*
+ * Returns the centre of mass of the array of bodies as a vector
+ */
 struct vector centre_of_mass (struct body * bodies, int bodies_length)
 {
 	struct vector ret = {0, 0};
@@ -85,10 +88,7 @@ int genbods (int n, struct body * bodies)
 		bodies[i].vel.x = (rand() % 10000) / 1000000.0;
 		bodies[i].vel.y = (rand() % 10000) / 1000000.0;
 
-		if (bodies[i].pos.x > 0) bodies[i].vel.y = -bodies[i].vel.y;
-		if (bodies[i].pos.y > 0) bodies[i].vel.x = -bodies[i].vel.x;
-
-		bodies[i].mass = 1e8;
+		bodies[i].mass = 1e9;
 	}
 	return 0;
 }
@@ -333,7 +333,7 @@ int main(int argc, char **argv)
 
 	struct body bodies[n];
 	
-	genbods(n, bodies);
+	if (n) genbods(n, bodies);
 
 	if (rendering_loop(bodies, n)) {
 		fprintf(stderr, "Error at rendering\n");
