@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <unistd.h>
+#include <time.h>
 
 #include <getopt.h>
 #include <SDL2/SDL.h>
@@ -18,6 +19,7 @@
 int width = DEFAULT_WIDTH;
 int height = DEFAULT_HEIGHT;
 Uint32 window_flags = 0;
+unsigned int n = 2;
 
 struct vector {
 	long double x;
@@ -29,6 +31,22 @@ struct body {
 	struct vector vel;
 	unsigned long mass;
 };
+
+/*
+ * Fills array with n bodies of random position and velocity (and maybe mass)
+ */
+int genbods (int n, struct body *bodies)
+{
+	int i;
+	for (i = 0; i < n; i++) {
+		bodies[i].pos.x = (rand() % width - width / 2) / DIST_SCALE;
+		bodies[i].pos.y = (rand() % height - height / 2) / DIST_SCALE;
+		bodies[i].vel.x = (rand() % 10000) / 100000.0 - 0.05;
+		bodies[i].vel.y = (rand() % 10000) / 100000.0 - 0.05;
+		bodies[i].mass = 1e8;
+	}
+	return 0;
+}
 
 /*
  * Prints each value for each body in the system in the same format it takes as
@@ -155,7 +173,7 @@ static int rendering_loop(struct body *bodies, int bodies_length)
 			SDL_RenderDrawPoint(renderer, pos_x, pos_y);
 		}
 
-		if (update_bodies(bodies, 2)) break;
+		if (update_bodies(bodies, bodies_length)) break;
 
 		SDL_RenderPresent(renderer);
 	}
@@ -182,7 +200,7 @@ static int parse_opts (int argc, char **argv)
 
 		option_index = 0;
 
-		c = getopt_long(argc, argv, "w:h:f",
+		c = getopt_long(argc, argv, "w:h:fg:",
 				long_options, &option_index);
 
 		if (c == -1)
@@ -200,20 +218,27 @@ static int parse_opts (int argc, char **argv)
 
 		case 'w':
 			if(!(width = atoi(optarg))) {
-				printf("Option w requires int value\n");
+				fprintf(stderr, "Option w requires int value\n");
 				return -1;
 			}
 			break;
 
 		case 'h':
 			if(!(height = atoi(optarg))) {
-				printf("Option h requires int value\n");
+				fprintf(stderr, "Option h requires int value\n");
 				return -1;
 			}
 			break;
 
 		case 'f':
 			window_flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
+			break;
+
+		case 'g':
+			if (!(n = atoi(optarg))) {
+				fprintf(stderr, "Option n requires int value\n");
+				return -1;
+			}
 			break;
 
 		case '?':
@@ -229,19 +254,23 @@ static int parse_opts (int argc, char **argv)
 
 int main(int argc, char **argv)
 {
+	srand(time(NULL));
+
 	if (parse_opts(argc, argv)) {
 		fprintf(stderr, "Error at parse_opts\n");
 		exit(EXIT_FAILURE);
 	}
 
-	struct body bodies[2];
+	struct body bodies[n];
+	
+	genbods(n, bodies);
 
-	if (rendering_loop(bodies, 2)) {
+	if (rendering_loop(bodies, n)) {
 		fprintf(stderr, "Error at rendering\n");
 		exit(EXIT_FAILURE);
 	}
 
-	print_system(bodies, 2);
+	print_system(bodies, n);
 	
 	exit(EXIT_SUCCESS);
 }
