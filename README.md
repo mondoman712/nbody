@@ -28,7 +28,7 @@ Options:
 Examples:
 ./nbody -fg 128 	Generates 128 bodies and runs fullscreen
 ```
-## TODO
+## To Do
 
 * ~~Get the physics working~~ DONE
 * Add input from file/stdin
