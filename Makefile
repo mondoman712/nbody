@@ -8,7 +8,7 @@ CFLAGS = -c -g -W -Wall -Werror -std=c99
 SDL_LDFLAGS = $(shell sdl2-config --libs)
 LDFLAGS = -g -lm
 
-MAIN = src/main.c
+MAIN = main.c
 
 nbody: main.o	
 	$(CC) $(LDFLAGS) $(SDL_LDFLAGS) -o nbody main.o
