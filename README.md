@@ -12,10 +12,10 @@ Easiest way to build is
 ```
 make
 ```
-but just look at the make file and figure it out if you don't want to use make.o
+but just look at the make file and figure it out if you don't want to use make.
 
 ## Usage
-
+```
 ./nbody [OPTION]...
 
 Options:
@@ -27,7 +27,7 @@ Options:
 
 Examples:
 ./nbody -fg 128 	Generates 128 bodies and runs fullscreen
-
+```
 ## TODO
 
 * ~~Get the physics working~~ DONE
