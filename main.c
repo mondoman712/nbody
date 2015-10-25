@@ -257,16 +257,17 @@ static int parse_opts (int argc, char **argv)
 	while(1) {
 		static struct option long_options[] = {
 			{"width", required_argument, 0, 'w'},
-			{"height", required_argument, 0, 'h'},
+			{"height", required_argument, 0, 'l'},
 			{"fullscreen", no_argument, 0, 'f'},
 			{"generate", required_argument, 0, 'g'},
 			{"centre", no_argument, 0, 'c'},
+			{"help", no_argument, 0, 'h'},
 			{0, 0, 0, 0}
 		};
 
 		option_index = 0;
 
-		c = getopt_long(argc, argv, "w:h:fg:c",
+		c = getopt_long(argc, argv, "w:l:fg:ch",
 				long_options, &option_index);
 
 		if (c == -1)
@@ -289,7 +290,7 @@ static int parse_opts (int argc, char **argv)
 			}
 			break;
 
-		case 'h':
+		case 'l':
 			if(!(height = atoi(optarg))) {
 				fprintf(stderr, "Option h requires int value\n");
 				return -1;
@@ -311,6 +312,20 @@ static int parse_opts (int argc, char **argv)
 			centre_flag = 1;
 			break;
 
+		case 'h':
+			printf("Usage: ./nbody [OPTION]...\n");
+			printf("Simplistic 2D N body simulator\n\n");
+			printf("Options:\n");
+			printf(" -w, --width\t Width of the window\n");
+			printf(" -l, --height\t Height of the window\n");
+			printf(" -f, --fullscreen\t Sets window to fullscreen\n");
+			printf(" -g, --generate\t Randomly generates given number of bodies\n");
+			printf(" -c, --centre\t Centres renders onto the centre of mass\n\n");
+			printf("Examples:\n");
+		        printf("\t./nbody -fg 128\t Generates 128 bodies and runs fullscreen\n\n");
+			printf("Github: <https://github.com/mondoman712/nbody>\n");
+			exit(EXIT_SUCCESS);
+
 		case '?':
 			break;
 
@@ -326,10 +341,8 @@ int main(int argc, char **argv)
 {
 	srand(time(NULL));
 
-	if (parse_opts(argc, argv)) {
-		fprintf(stderr, "Error at parse_opts\n");
+	if (parse_opts(argc, argv) == -1)
 		exit(EXIT_FAILURE);
-	}
 
 	struct body bodies[n];
 	
