@@ -265,6 +265,25 @@ static int rendering_loop (struct body * bodies, int bodies_length)
 }
 
 /*
+ * Prints the help message
+ */
+void print_help ()
+{
+	printf("Usage: ./nbody [OPTION]...\n");
+	printf("Simplistic 2D N body simulator\n\n");
+	printf("Options:\n");
+	printf(" -w, --width\t Width of the window\n");
+	printf(" -l, --height\t Height of the window\n");
+	printf(" -f, --fullscreen\t Sets window to fullscreen\n");
+	printf(" -g, --generate\t Randomly generates given number of bodies\n");
+	printf(" -c, --centre\t Centres renders onto the centre of mass\n\n");
+	printf("Examples:\n");
+        printf("\t./nbody -fg 128\t Generates 128 bodies and runs fullscreen\n\n");
+	printf("Github: <https://github.com/mondoman712/nbody>\n");
+}
+
+
+/*
  * Parses the command line arguments, better here than all this being in main
  */
 static int parse_opts (int argc, char **argv)
@@ -330,17 +349,7 @@ static int parse_opts (int argc, char **argv)
 			break;
 
 		case 'h':
-			printf("Usage: ./nbody [OPTION]...\n");
-			printf("Simplistic 2D N body simulator\n\n");
-			printf("Options:\n");
-			printf(" -w, --width\t Width of the window\n");
-			printf(" -l, --height\t Height of the window\n");
-			printf(" -f, --fullscreen\t Sets window to fullscreen\n");
-			printf(" -g, --generate\t Randomly generates given number of bodies\n");
-			printf(" -c, --centre\t Centres renders onto the centre of mass\n\n");
-			printf("Examples:\n");
-		        printf("\t./nbody -fg 128\t Generates 128 bodies and runs fullscreen\n\n");
-			printf("Github: <https://github.com/mondoman712/nbody>\n");
+			print_help();
 			exit(EXIT_SUCCESS);
 
 		case '?':
