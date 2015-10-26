@@ -178,8 +178,11 @@ int draw_com (struct vector com, SDL_Renderer * renderer)
 	return 0;
 }
 
-int draw_bodies (struct body * bodies, int bodies_length, struct vector com,
-		SDL_Renderer * renderer)
+/*
+ * Draws the bodies contained in the array of length bodies_length at *bodies
+ */
+int draw_bodies (struct body * bodies, int bodies_length, 
+		struct vector centre_of_mass, SDL_Renderer * renderer)
 {
 	int i;
 	long double pos_x, pos_y;
@@ -187,10 +190,10 @@ int draw_bodies (struct body * bodies, int bodies_length, struct vector com,
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	for (i = 0; i < bodies_length; i++) {
 		pos_x = (width / 2) + (bodies[i].pos.x / DIST_SCALE);
-		if (centre_flag) pos_x -= com.x;
+		if (centre_flag) pos_x -= centre_of_mass.x;
 
 		pos_y = (height / 2) - (bodies[i].pos.y / DIST_SCALE);
-		if (centre_flag) pos_y += com.y;
+		if (centre_flag) pos_y += centre_of_mass.y;
 
 		SDL_RenderDrawPoint(renderer, pos_x, pos_y);
 	}
