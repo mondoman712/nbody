@@ -162,7 +162,7 @@ static int update_bodies (struct body *bodies, int bodies_length)
 /*
  * Draws the centre of mass point / centre point (when the centre flag is true)
  */
-void draw_com (struct vector com, SDL_Renderer * renderer)
+int draw_com (struct vector com, SDL_Renderer * renderer)
 {
 	if (centre_flag) {
 		com.x = width / 2;
@@ -174,6 +174,28 @@ void draw_com (struct vector com, SDL_Renderer * renderer)
 
 	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 	SDL_RenderDrawPoint(renderer, com.x, com.y);
+
+	return 0;
+}
+
+int draw_bodies (struct body * bodies, int bodies_length, struct vector com,
+		SDL_Renderer * renderer)
+{
+	int i;
+	long double pos_x, pos_y;
+
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+	for (i = 0; i < bodies_length; i++) {
+		pos_x = (width / 2) + (bodies[i].pos.x / DIST_SCALE);
+		if (centre_flag) pos_x -= com.x;
+
+		pos_y = (height / 2) - (bodies[i].pos.y / DIST_SCALE);
+		if (centre_flag) pos_y += com.y;
+
+		SDL_RenderDrawPoint(renderer, pos_x, pos_y);
+	}
+
+	return 0;
 }
 
 /*
@@ -185,9 +207,6 @@ static int rendering_loop (struct body * bodies, int bodies_length)
 	SDL_Renderer *renderer;
 	SDL_Event e;
 	SDL_DisplayMode d;
-
-	int i;
-	long double pos_x, pos_y;
 
 	if (SDL_Init(SDL_INIT_VIDEO)) {
 		fprintf(stderr, "SDL not Initialized\n");
@@ -227,20 +246,9 @@ static int rendering_loop (struct body * bodies, int bodies_length)
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
-		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		
 		struct vector com = centre_of_mass(bodies, bodies_length);
-
-		for (i = 0; i < bodies_length; i++) {
-			pos_x = (width / 2) + (bodies[i].pos.x / DIST_SCALE);
-			if (centre_flag) pos_x -= com.x;
-
-			pos_y = (height / 2) - (bodies[i].pos.y / DIST_SCALE);
-			if (centre_flag) pos_y += com.y;
-
-			SDL_RenderDrawPoint(renderer, pos_x, pos_y);
-		}
-
+		draw_bodies(bodies, bodies_length, com, renderer);
 		if (update_bodies(bodies, bodies_length)) break;
 
 		draw_com(com, renderer);
