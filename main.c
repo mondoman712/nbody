@@ -98,17 +98,17 @@ static int genbods (int n, struct body * bodies)
  * Prints each value for each body in the system in the same format it takes as
  * input
  */
-static int print_system (struct body *bodies, int bodies_length)
+static int print_system (FILE * stream, struct body *bodies, int bodies_length)
 {
 	int i;
 
-	fprintf(stdout, "%f, %f\n", DIST_SCALE, TIME_SCALE);
+	fprintf(stream, "%f, %f\n", DIST_SCALE, TIME_SCALE);
 	for (i = 0; i < bodies_length; i++) {
-		fprintf(stdout, "%Lf, ", bodies[i].pos.x);
-		fprintf(stdout, "%Lf, ", bodies[i].pos.y);
-		fprintf(stdout, "%Lf, ", bodies[i].vel.x);
-		fprintf(stdout, "%Lf, ", bodies[i].vel.y);
-		fprintf(stdout, "%ld;\n", bodies[i].mass);
+		fprintf(stream, "%Lf, ", bodies[i].pos.x);
+		fprintf(stream, "%Lf, ", bodies[i].pos.y);
+		fprintf(stream, "%Lf, ", bodies[i].vel.x);
+		fprintf(stream, "%Lf, ", bodies[i].vel.y);
+		fprintf(stream, "%ld;\n", bodies[i].mass);
 	}
 
 	return 0;
@@ -366,21 +366,22 @@ static int parse_opts (int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-	srand(time(NULL));
-
 	if (parse_opts(argc, argv) == -1)
 		exit(EXIT_FAILURE);
 
 	struct body bodies[n];
 	
-	if (n) genbods(n, bodies);
+	if (n) {
+		srand(time(NULL));
+	       	genbods(n, bodies);
+	}
 
 	if (rendering_loop(bodies, n)) {
 		fprintf(stderr, "Error at rendering\n");
 		exit(EXIT_FAILURE);
 	}
 
-	print_system(bodies, n);
+	print_system(stdout, bodies, n);
 	
 	exit(EXIT_SUCCESS);
 }
