@@ -160,9 +160,26 @@ static int update_bodies (struct body *bodies, int bodies_length)
 }
 
 /*
+ * Draws the centre of mass point / centre point (when the centre flag is true)
+ */
+void draw_com (struct vector com, SDL_Renderer * renderer)
+{
+	if (centre_flag) {
+		com.x = width / 2;
+		com.y = height / 2;
+	} else {
+		com.x = (width / 2) + (com.x / DIST_SCALE);
+		com.y = (height / 2) - (com.y / DIST_SCALE);
+	}
+
+	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+	SDL_RenderDrawPoint(renderer, com.x, com.y);
+}
+
+/*
  * Initializes the SDL window and runs the main loop
  */
-static int rendering_loop(struct body *bodies, int bodies_length)
+static int rendering_loop (struct body * bodies, int bodies_length)
 {
 	SDL_Window *window;
 	SDL_Renderer *renderer;
@@ -211,7 +228,7 @@ static int rendering_loop(struct body *bodies, int bodies_length)
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-
+		
 		struct vector com = centre_of_mass(bodies, bodies_length);
 
 		for (i = 0; i < bodies_length; i++) {
@@ -226,18 +243,7 @@ static int rendering_loop(struct body *bodies, int bodies_length)
 
 		if (update_bodies(bodies, bodies_length)) break;
 
-		/* Renders centre of mass point */
-		if (centre_flag) {
-			com.x = width / 2;
-			com.y = height / 2;
-		} else {
-			com.x = (width / 2) + (com.x / DIST_SCALE);
-			com.y = (height / 2) - (com.y / DIST_SCALE);
-			SDL_RenderDrawPoint(renderer, com.x, com.y);
-		}
-
-		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-		SDL_RenderDrawPoint(renderer, com.x, com.y);
+		draw_com(com, renderer);
 
 		SDL_RenderPresent(renderer);
 	}
