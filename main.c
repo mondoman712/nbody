@@ -59,14 +59,15 @@ struct body {
 /*
  * Returns the centre of mass of the array of bodies as a vector
  */
-struct vector centre_of_mass (struct body * bodies, int bodies_length)
+static struct vector centre_of_mass (struct body * bodies, int bodies_length)
 {
 	struct vector ret = {0, 0};
-	int i, mtot;
+	int i;
+	unsigned long long mtot = 0;
 
 	for (i = 0; i < bodies_length; i++) {
-		ret.x += bodies[i].pos.x * bodies[i].mass;
-		ret.y += bodies[i].pos.y * bodies[i].mass;
+		ret.x += (bodies[i].pos.x * bodies[i].mass);
+		ret.y += (bodies[i].pos.y * bodies[i].mass);
 		mtot += bodies[i].mass;
 	}
 
@@ -79,7 +80,7 @@ struct vector centre_of_mass (struct body * bodies, int bodies_length)
 /*
  * Fills array with n bodies of random position and velocity (and maybe mass)
  */
-int genbods (int n, struct body * bodies)
+static int genbods (int n, struct body * bodies)
 {
 	int i;
 	for (i = 0; i < n; i++) {
@@ -162,7 +163,7 @@ static int update_bodies (struct body *bodies, int bodies_length)
 /*
  * Draws the centre of mass point / centre point (when the centre flag is true)
  */
-int draw_com (struct vector com, SDL_Renderer * renderer)
+static int draw_com (struct vector com, SDL_Renderer * renderer)
 {
 	if (centre_flag) {
 		com.x = width / 2;
@@ -181,7 +182,7 @@ int draw_com (struct vector com, SDL_Renderer * renderer)
 /*
  * Draws the bodies contained in the array of length bodies_length at *bodies
  */
-int draw_bodies (struct body * bodies, int bodies_length, 
+static int draw_bodies (struct body * bodies, int bodies_length, 
 		struct vector centre_of_mass, SDL_Renderer * renderer)
 {
 	int i;
@@ -267,7 +268,7 @@ static int rendering_loop (struct body * bodies, int bodies_length)
 /*
  * Prints the help message
  */
-void print_help ()
+static void print_help ()
 {
 	printf("Usage: ./nbody [OPTION]...\n");
 	printf("Simplistic 2D N body simulator\n\n");
@@ -290,17 +291,17 @@ static int parse_opts (int argc, char **argv)
 {
 	int c, option_index;
 
-	while(1) {
-		static struct option long_options[] = {
-			{"width", required_argument, 0, 'w'},
-			{"height", required_argument, 0, 'l'},
-			{"fullscreen", no_argument, 0, 'f'},
-			{"generate", required_argument, 0, 'g'},
-			{"centre", no_argument, 0, 'c'},
-			{"help", no_argument, 0, 'h'},
-			{0, 0, 0, 0}
-		};
+	static struct option long_options[] = {
+		{"width", required_argument, 0, 'w'},
+		{"height", required_argument, 0, 'l'},
+		{"fullscreen", no_argument, 0, 'f'},
+		{"generate", required_argument, 0, 'g'},
+		{"centre", no_argument, 0, 'c'},
+		{"help", no_argument, 0, 'h'},
+		{0, 0, 0, 0}
+	};
 
+	while(1) {
 		option_index = 0;
 
 		c = getopt_long(argc, argv, "w:l:fg:ch",
