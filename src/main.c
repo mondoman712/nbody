@@ -259,7 +259,12 @@ static int rendering_loop (body * bodies, int bodies_length)
 	SDL_RenderPresent(renderer);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 
+	Uint64 ts, te;
+	GLdouble tpf;
+
 	while (1) {
+		ts = SDL_GetPerformanceCounter();
+
 		if (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) 
 				break;
@@ -277,7 +282,14 @@ static int rendering_loop (body * bodies, int bodies_length)
 		draw_com(com, renderer);
 
 		SDL_RenderPresent(renderer);
+
+		te = SDL_GetPerformanceCounter() - ts;
+		tpf = (GLdouble) te / (GLdouble) SDL_GetPerformanceFrequency()
+			* 1000;
+		printf("\r%02.6fms", tpf);
 	}
+
+	printf("\n");
 
 	SDL_DestroyWindow(window);
 
@@ -399,8 +411,6 @@ int main(int argc, char **argv)
 		fprintf(stderr, "Error at rendering\n");
 		exit(EXIT_FAILURE);
 	}
-
-	print_system(stdout, bodies, n);
 	
 	exit(EXIT_SUCCESS);
 }
