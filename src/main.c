@@ -29,6 +29,7 @@
 
 #include <getopt.h>
 #include <SDL2/SDL.h>
+#include <GL/glew.h>
 
 #define G 6.67408e-11L
 #define DIST_SCALE 1.0
@@ -36,6 +37,9 @@
 
 #define DEFAULT_WIDTH 1024
 #define DEFAULT_HEIGHT 768
+
+#define SHADER_DIR "src/shaders/"
+#define SHADER_EXT ".glsl"
 
 #define KEY_QUIT SDLK_q
 
@@ -45,34 +49,37 @@ Uint32 window_flags = 0;
 int centre_flag = 0;
 unsigned int n = 0;
 
-struct vector {
-	long double x;
-	long double y;
-};
+typedef struct {
+	GLdouble x;
+	GLdouble y;
+	GLdouble z;
+} vec3;
 
-struct body {
-	struct vector pos;
-	struct vector vel;
-	unsigned long mass;
-};
+typedef struct {
+	vec3 pos;
+	vec3 vel;
+	GLuint64 mass;
+} body;
 
 /*
  * Returns the centre of mass of the array of bodies as a vector
  */
-static struct vector centre_of_mass (struct body * bodies, int bodies_length)
+static vec3 centre_of_mass (body * bodies, int bodies_length)
 {
-	struct vector ret = {0, 0};
+	vec3 ret = {0, 0, 0};
 	int i;
-	unsigned long long mtot = 0;
+	GLuint64 mtot = 0;
 
 	for (i = 0; i < bodies_length; i++) {
 		ret.x += (bodies[i].pos.x * bodies[i].mass);
 		ret.y += (bodies[i].pos.y * bodies[i].mass);
+		ret.z += (bodies[i].pos.z * bodies[i].mass);
 		mtot += bodies[i].mass;
 	}
 
 	ret.x /= mtot;
 	ret.y /= mtot;
+	ret.z /= mtot;
 
 	return ret;
 }
@@ -80,14 +87,17 @@ static struct vector centre_of_mass (struct body * bodies, int bodies_length)
 /*
  * Fills array with n bodies of random position and velocity (and maybe mass)
  */
-static int genbods (int n, struct body * bodies)
+static int genbods (int n, body * bodies)
 {
 	int i;
 	for (i = 0; i < n; i++) {
 		bodies[i].pos.x = (rand() % width - (width / 2)) / DIST_SCALE;
 		bodies[i].pos.y = (rand() % height - (height / 2)) / DIST_SCALE;
+		bodies[i].pos.z = (rand() % height - (height / 2)) / DIST_SCALE;
+
 		bodies[i].vel.x = (rand() % 10000) / 1000000.0;
 		bodies[i].vel.y = (rand() % 10000) / 1000000.0;
+		bodies[i].vel.z = (rand() % 10000) / 1000000.0;
 
 		bodies[i].mass = 1e9;
 	}
@@ -98,16 +108,18 @@ static int genbods (int n, struct body * bodies)
  * Prints each value for each body in the system in the same format it takes as
  * input
  */
-static int print_system (FILE * stream, struct body *bodies, int bodies_length)
+static int print_system (FILE * stream, body * bodies, int bodies_length)
 {
 	int i;
 
 	fprintf(stream, "%f, %f\n", DIST_SCALE, TIME_SCALE);
 	for (i = 0; i < bodies_length; i++) {
-		fprintf(stream, "%Lf, ", bodies[i].pos.x);
-		fprintf(stream, "%Lf, ", bodies[i].pos.y);
-		fprintf(stream, "%Lf, ", bodies[i].vel.x);
-		fprintf(stream, "%Lf, ", bodies[i].vel.y);
+		fprintf(stream, "%f, ", bodies[i].pos.x);
+		fprintf(stream, "%f, ", bodies[i].pos.y);
+		fprintf(stream, "%f, ", bodies[i].pos.z);
+		fprintf(stream, "%f, ", bodies[i].vel.x);
+		fprintf(stream, "%f, ", bodies[i].vel.y);
+		fprintf(stream, "%f, ", bodies[i].vel.z);
 		fprintf(stream, "%ld;\n", bodies[i].mass);
 	}
 
@@ -117,44 +129,51 @@ static int print_system (FILE * stream, struct body *bodies, int bodies_length)
 /*
  * Calculates the accelerations of bodies a and b and edits their velocities
  */
-static int calc_accels (struct body *a, struct body *b) 
+static void calc_accels (body * a, body * b) 
 {
-	long double r_x, r_y, r2, r, g_ij, g_ji;
+	vec3 rv;
+	GLdouble r, r2, g_ij, g_ji;
 
-	r_x = a->pos.x - b->pos.x;
-	r_y = a->pos.y - b->pos.y;
+	rv.x = a->pos.x - b->pos.x;
+	rv.y = a->pos.y - b->pos.y;
+	rv.z = a->pos.z - b->pos.z;
 
-	r2 = powl(r_x, 2) + powl(r_y, 2);
+	r2 = rv.x * rv.x + rv.y * rv.y + rv.z * rv.z;
 	r = sqrtl(r2);
 
 	g_ji = (b->mass * G) / r2; // Acceleration on I
 	g_ij = (a->mass * G) / r2; // Acceleration on J
 
-	r_x = r_x / r; 
-	r_y = r_y / r;
-	a->vel.x -= g_ji * r_x;
-	b->vel.x += g_ij * r_x;
-	a->vel.y -= g_ji * r_y;
-	b->vel.y += g_ij * r_y;
+	rv.x = rv.x / r; 
+	rv.y = rv.y / r;
+	rv.z = rv.z / r;
 
-	return 0;
+	a->vel.x -= g_ji * rv.x;
+	b->vel.x += g_ij * rv.x;
+
+	a->vel.y -= g_ji * rv.y;
+	b->vel.y += g_ij * rv.y;
+
+	a->vel.z -= g_ji * rv.z;
+	b->vel.z += g_ij * rv.z;
 }
 
 
 /*
  * Updates the positions and then velocities of all the bodies in the system
  */
-static int update_bodies (struct body *bodies, int bodies_length)
+static int update_bodies (body * bodies, int bodies_length)
 {
 	int i, j;
 
 	for (i = 0; i < (bodies_length - 1); i++)
 		for (j = (i + 1); j < bodies_length; j++)
-			if (calc_accels(&bodies[i], &bodies[j])) return -1;
+			calc_accels(&bodies[i], &bodies[j]);
 
 	for (i = 0; i < bodies_length; i++) {
 		bodies[i].pos.x += (bodies[i].vel.x * TIME_SCALE);
 		bodies[i].pos.y += (bodies[i].vel.y * TIME_SCALE);
+		bodies[i].pos.z += (bodies[i].vel.z * TIME_SCALE);
 	}
 
 	return 0;
@@ -163,7 +182,7 @@ static int update_bodies (struct body *bodies, int bodies_length)
 /*
  * Draws the centre of mass point / centre point (when the centre flag is true)
  */
-static int draw_com (struct vector com, SDL_Renderer * renderer)
+static int draw_com (vec3 com, SDL_Renderer * renderer)
 {
 	if (centre_flag) {
 		com.x = width / 2;
@@ -182,11 +201,11 @@ static int draw_com (struct vector com, SDL_Renderer * renderer)
 /*
  * Draws the bodies contained in the array of length bodies_length at *bodies
  */
-static int draw_bodies (struct body * bodies, int bodies_length, 
-		struct vector centre_of_mass, SDL_Renderer * renderer)
+static int draw_bodies (body * bodies, int bodies_length, vec3 centre_of_mass,
+		SDL_Renderer * renderer)
 {
 	int i;
-	long double pos_x, pos_y;
+	GLdouble pos_x, pos_y;
 
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	for (i = 0; i < bodies_length; i++) {
@@ -205,7 +224,7 @@ static int draw_bodies (struct body * bodies, int bodies_length,
 /*
  * Initializes the SDL window and runs the main loop
  */
-static int rendering_loop (struct body * bodies, int bodies_length)
+static int rendering_loop (body * bodies, int bodies_length)
 {
 	SDL_Window *window;
 	SDL_Renderer *renderer;
@@ -251,7 +270,7 @@ static int rendering_loop (struct body * bodies, int bodies_length)
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 		
-		struct vector com = centre_of_mass(bodies, bodies_length);
+		vec3 com = centre_of_mass(bodies, bodies_length);
 		draw_bodies(bodies, bodies_length, com, renderer);
 		if (update_bodies(bodies, bodies_length)) break;
 
@@ -369,7 +388,7 @@ int main(int argc, char **argv)
 	if (parse_opts(argc, argv) == -1)
 		exit(EXIT_FAILURE);
 
-	struct body bodies[n];
+	body bodies[n];
 	
 	if (n) {
 		srand(time(NULL));
