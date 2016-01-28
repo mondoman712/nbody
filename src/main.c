@@ -33,7 +33,7 @@
 
 #define G 6.67408e-11L
 #define DIST_SCALE 1.0
-#define TIME_SCALE 1.0
+#define TIME_SCALE 1000.0
 
 #define DEFAULT_WIDTH 1024
 #define DEFAULT_HEIGHT 768
@@ -162,7 +162,7 @@ static void calc_accels (body * a, body * b)
 /*
  * Updates the positions and then velocities of all the bodies in the system
  */
-static int update_bodies (body * bodies, int bodies_length)
+static int update_bodies (body * bodies, int bodies_length, GLdouble t)
 {
 	int i, j;
 
@@ -171,9 +171,9 @@ static int update_bodies (body * bodies, int bodies_length)
 			calc_accels(&bodies[i], &bodies[j]);
 
 	for (i = 0; i < bodies_length; i++) {
-		bodies[i].pos.x += (bodies[i].vel.x * TIME_SCALE);
-		bodies[i].pos.y += (bodies[i].vel.y * TIME_SCALE);
-		bodies[i].pos.z += (bodies[i].vel.z * TIME_SCALE);
+		bodies[i].pos.x += (bodies[i].vel.x * t * TIME_SCALE);
+		bodies[i].pos.y += (bodies[i].vel.y * t * TIME_SCALE);
+		bodies[i].pos.z += (bodies[i].vel.z * t * TIME_SCALE);
 	}
 
 	return 0;
@@ -261,9 +261,9 @@ static int rendering_loop (body * bodies, int bodies_length)
 
 	Uint64 ts, te;
 	GLdouble tpf;
+	ts = SDL_GetPerformanceCounter();
 
 	while (1) {
-		ts = SDL_GetPerformanceCounter();
 
 		if (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) 
@@ -274,19 +274,19 @@ static int rendering_loop (body * bodies, int bodies_length)
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
+
+		te = SDL_GetPerformanceCounter() - ts;
+		tpf = (GLdouble) te / (GLdouble) SDL_GetPerformanceFrequency();
+		ts = SDL_GetPerformanceCounter();
 		
+		if (update_bodies(bodies, bodies_length, tpf)) break;
 		vec3 com = centre_of_mass(bodies, bodies_length);
 		draw_bodies(bodies, bodies_length, com, renderer);
-		if (update_bodies(bodies, bodies_length)) break;
-
 		draw_com(com, renderer);
 
 		SDL_RenderPresent(renderer);
 
-		te = SDL_GetPerformanceCounter() - ts;
-		tpf = (GLdouble) te / (GLdouble) SDL_GetPerformanceFrequency()
-			* 1000;
-		printf("\r%02.6fms", tpf);
+		printf("\r%02.6fms", tpf * 1000);
 	}
 
 	printf("\n");
