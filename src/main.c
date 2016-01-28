@@ -45,7 +45,7 @@
 
 int width = DEFAULT_WIDTH;
 int height = DEFAULT_HEIGHT;
-Uint32 window_flags = 0;
+Uint32 window_flags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
 int centre_flag = 0;
 unsigned int n = 0;
 
@@ -60,6 +60,97 @@ typedef struct {
 	vec3 vel;
 	GLuint64 mass;
 } body;
+
+/*
+ * Reads and compiles a .glsl shader file in the shaders folder, from just the
+ * core of the filename (to use shaders/vs1.glsl, filename is just vsl)
+ */
+GLuint create_shader (const GLenum shader_type, const char * filename)
+{
+	char _source[4096];
+	char dest[64];
+
+	/* Create full filename */
+	strcpy(dest, SHADER_DIR);
+	strcat(dest, filename);
+	strcat(dest, SHADER_EXT);
+
+	/* Open file */
+	FILE * s = fopen(dest, "r");
+	if (s == NULL) {
+		fprintf(stderr, "Could not open file %s\n", dest);
+		return 1;
+	}
+
+	/* Read all lines in file */
+	int i = 0;
+	char inc;
+	while (fscanf(s, "%c", &inc) > 0)
+		_source[i++] = inc;
+	
+	/* Close file */
+	fclose(s);
+
+	/* Add string terminator to file */
+	_source[i - 1] = '\0';
+
+	/* Change type of source */
+	const char * source = _source;
+
+	/* Compile Shader */
+	GLuint shader = glCreateShader(shader_type);
+	glShaderSource(shader, 1, &source, NULL);
+	glCompileShader(shader);
+
+	/* Check for and report errors */
+	GLint status;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+	if (status == GL_FALSE) {
+		char buff[512];
+		glGetShaderInfoLog(shader, 512, NULL, buff);
+		fprintf(stderr, "Shader %s failed to compile with error:\n", 
+				filename);
+		fprintf(stderr, "%s\n", buff);
+		fprintf(stderr, "\n");
+	}
+
+	return shader;
+}
+
+/*
+ * Fills a mat4 with zeros
+ */
+void zeros (GLfloat * mat4)
+{
+	GLushort i;
+	for (i = 0; i < 16; i++)
+		*(mat4 + i) = 0;
+}
+
+/*
+ * Creates a 4x4 identity matrix
+ */
+void identity (GLfloat * mat4)
+{
+	zeros(mat4);
+	
+	*mat4 = 1;
+	*(mat4 + 5) = 1;
+	*(mat4 + 10) = 1;
+	*(mat4 + 15) = 1;
+}
+
+/*
+ * Creates a matrix to move a vector by the vector pos
+ */
+void translate (vec3 pos, GLfloat * mat4)
+{
+	identity(mat4);
+
+	*(mat4 + 12) = pos.x;
+	*(mat4 + 13) = pos.y;
+	*(mat4 + 14) = pos.z;
+}
 
 /*
  * Returns the centre of mass of the array of bodies as a vector
@@ -90,6 +181,7 @@ static vec3 centre_of_mass (body * bodies, int bodies_length)
 static int genbods (int n, body * bodies)
 {
 	int i;
+
 	for (i = 0; i < n; i++) {
 		bodies[i].pos.x = (rand() % width - (width / 2)) / DIST_SCALE;
 		bodies[i].pos.y = (rand() % height - (height / 2)) / DIST_SCALE;
@@ -198,27 +290,30 @@ static int draw_com (vec3 com, SDL_Renderer * renderer)
 	return 0;
 }
 
+static void draw_body (body b, GLuint attr_vert, GLuint uni_model)
+{
+	GLdouble verts[] = {b.pos.x, b.pos.y, b.pos.z};
+	glBufferData(GL_ARRAY_BUFFER, 3 * sizeof(GLdouble), verts,
+			GL_STATIC_DRAW);
+
+	vec3 spos = {b.pos.x / 1024, b.pos.y / 768, b.pos.z / 1000};
+	GLfloat model[16];
+	translate(spos, model);
+	glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
+	
+	glVertexAttribPointer(attr_vert, 3, GL_DOUBLE, GL_FALSE, 0, 0);
+
+	glDrawArrays(GL_POINTS, 0, 1);
+}
 /*
  * Draws the bodies contained in the array of length bodies_length at *bodies
  */
-static int draw_bodies (body * bodies, int bodies_length, vec3 centre_of_mass,
-		SDL_Renderer * renderer)
+static void draw_bodies (body * bodies, int bodies_length, GLuint attr_vert,
+		GLuint uni_model)
 {
 	int i;
-	GLdouble pos_x, pos_y;
-
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-	for (i = 0; i < bodies_length; i++) {
-		pos_x = (width / 2) + (bodies[i].pos.x / DIST_SCALE);
-		if (centre_flag) pos_x -= centre_of_mass.x;
-
-		pos_y = (height / 2) - (bodies[i].pos.y / DIST_SCALE);
-		if (centre_flag) pos_y += centre_of_mass.y;
-
-		SDL_RenderDrawPoint(renderer, pos_x, pos_y);
-	}
-
-	return 0;
+	for (i = 0; i < bodies_length; i++)
+		draw_body(bodies[i], attr_vert, uni_model);
 }
 
 /*
@@ -227,9 +322,7 @@ static int draw_bodies (body * bodies, int bodies_length, vec3 centre_of_mass,
 static int rendering_loop (body * bodies, int bodies_length)
 {
 	SDL_Window *window;
-	SDL_Renderer *renderer;
 	SDL_Event e;
-	SDL_DisplayMode d;
 
 	if (SDL_Init(SDL_INIT_VIDEO)) {
 		fprintf(stderr, "SDL not Initialized\n");
@@ -249,15 +342,55 @@ static int rendering_loop (body * bodies, int bodies_length)
 		return 1;
 	}
 
-	if (window_flags == SDL_WINDOW_FULLSCREEN_DESKTOP) {
-		if (SDL_GetWindowDisplayMode(window, &d)) return 1;
-		width = d.w;
-		height = d.h;
+	SDL_GLContext gl_context = SDL_GL_CreateContext(window);
+	if (gl_context == NULL) {
+		fprintf(stderr, "Failed to create OpenGL context\n");
+		return 1;
 	}
 
-	renderer = SDL_CreateRenderer(window, -1, 0);
-	SDL_RenderPresent(renderer);
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+	const unsigned char * version = glGetString(GL_VERSION);
+	if (version == NULL) {
+		fprintf(stderr, "Failed to get GL version\n");
+		return 1;
+	} else {
+		fprintf(stderr, "GL version is: %s\n", version);
+	}
+
+	SDL_GL_MakeCurrent(window, gl_context);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+
+	glewExperimental = GL_TRUE;
+	GLenum glew_status = glewInit();
+	if (glew_status) {
+		fprintf(stderr, "Error %s\n", glewGetErrorString(glew_status));
+		return 1;
+	}
+
+	GLdouble verts[] = {0.0, 0.0, 0.0};
+	
+	GLuint vbo;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+
+	GLuint vs = create_shader(GL_VERTEX_SHADER, "vs1");
+	GLuint fs = create_shader(GL_FRAGMENT_SHADER, "fs1");
+
+	GLuint sp = glCreateProgram();
+	glAttachShader(sp, vs);
+	glAttachShader(sp, fs);
+	glBindFragDataLocation(sp, 0, "out_colour");
+	glLinkProgram(sp);
+	glUseProgram(sp);
+
+	GLuint uni_model = glGetUniformLocation(sp, "model");
+
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	GLuint attr_vert = glGetAttribLocation(sp, "vert");
 
 	Uint64 ts, te;
 	GLdouble tpf;
@@ -272,8 +405,8 @@ static int rendering_loop (body * bodies, int bodies_length)
 				break;
 		}
 
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-		SDL_RenderClear(renderer);
+		glClearColor(0.0, 0.0, 0.0, 1.0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		te = SDL_GetPerformanceCounter() - ts;
 		tpf = (GLdouble) te / (GLdouble) SDL_GetPerformanceFrequency();
@@ -281,10 +414,9 @@ static int rendering_loop (body * bodies, int bodies_length)
 		
 		if (update_bodies(bodies, bodies_length, tpf)) break;
 		vec3 com = centre_of_mass(bodies, bodies_length);
-		draw_bodies(bodies, bodies_length, com, renderer);
-		draw_com(com, renderer);
+		draw_bodies(bodies, bodies_length, attr_vert, uni_model);
 
-		SDL_RenderPresent(renderer);
+		SDL_GL_SwapWindow(window);
 
 		printf("\r%02.6fms", tpf * 1000);
 	}
@@ -366,7 +498,7 @@ static int parse_opts (int argc, char **argv)
 			break;
 
 		case 'f':
-			window_flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
+			window_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 			break;
 
 		case 'g':
