@@ -533,9 +533,9 @@ static int rendering_loop (body * bodies, int bodies_length)
 
 	GLuint attr_vert = glGetAttribLocation(sp, "vert");
 
-	Uint64 ts, te;
+	Uint64 t, tl;
 	GLdouble tpf;
-	ts = SDL_GetPerformanceCounter();
+	t = SDL_GetPerformanceCounter();
 
 	while (1) {
 		if (SDL_PollEvent(&e)) {
@@ -566,9 +566,9 @@ static int rendering_loop (body * bodies, int bodies_length)
 		glClearColor(0.0, 0.0, 0.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		te = SDL_GetPerformanceCounter() - ts;
-		tpf = (GLdouble) te / (GLdouble) SDL_GetPerformanceFrequency();
-		ts = SDL_GetPerformanceCounter();
+		tl = t;
+		t = SDL_GetPerformanceCounter();
+		tpf = (GLdouble) (t - tl) / (GLdouble) SDL_GetPerformanceFrequency();
 		
 		if (update_bodies(bodies, bodies_length, tpf)) break;
 		vec3 com = centre_of_mass(bodies, bodies_length);
