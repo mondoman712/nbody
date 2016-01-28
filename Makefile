@@ -1,21 +1,22 @@
 CC = gcc
+CSTD = c99
 
-#GUILE_CFLAGS = `guile-config compile`
 SDL_CFLAGS = $(shell sdl2-config --cflags)
-CFLAGS = -c -g -W -Wall -Werror -std=c99
+CFLAGS = -g -W -Wall -pedantic -std=$(CSTD) $(SDL_CFLAGS)
 
-#GUILE_LDFLAGS = `guile-config link`
 SDL_LDFLAGS = $(shell sdl2-config --libs)
-LDFLAGS = -g -lm
+LDFLAGS = -lGL -lGLEW -lm -lpng -lz  $(SDL_LDFLAGS)
 
-MAIN = main.c
+SOURCES = $(wildcard src/*.c)
+OBJECTS = $(notdir $(SOURCES:.c=.o))
+EXECUTABLE = nbody
 
-nbody: main.o	
-	$(CC) $(LDFLAGS) $(SDL_LDFLAGS) -o nbody main.o
-	rm main.o
+$(EXECUTABLE): $(OBJECTS)
+	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+	rm $(OBJECTS)
 
-main.o: $(MAIN) $(SCHEME_INTERFACE) 
-	$(CC) $(CFLAGS) $(SDL_CFLAGS) $(MAIN)
+$(OBJECTS): $(SOURCES)
+	$(CC) $(CFLAGS) -c $(SOURCES)
 
 clean:
-	rm main.o nbody
+	rm $(OBJECTS) $(EXECUTABLE)
