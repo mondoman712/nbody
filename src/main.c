@@ -508,9 +508,16 @@ static int rendering_loop (body * bodies, int bodies_length)
 
 	GLint uni_model = glGetUniformLocation(sp, "model");
 
+	int mx = 0, my = 0;
+	GLfloat lon = PI, lat = PI / 2;
+	GLfloat sens = 0.1;
 	GLfloat view[16];
-	vec3 campos = {3.0, 3.0, 3.0};
-	look_at(campos, (vec3) {0.0, 0.0, 0.0}, (vec3) {1.0, 0.0, 0.0}, view);
+	vec3 campos;
+	campos.x = cos(lon) * sin(lat);
+	campos.y = sin(lon) * sin(lat);
+	campos.z = cos(lat);
+	vec3 cen = {0.0, 0.0, 0.0}, up = {1.0, 0.0, 0.0};
+	look_at(campos, cen, up, view);
 	GLint uni_view = glGetUniformLocation(sp, "view");
 	glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
 
@@ -531,13 +538,30 @@ static int rendering_loop (body * bodies, int bodies_length)
 	ts = SDL_GetPerformanceCounter();
 
 	while (1) {
-
 		if (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) 
 				break;
 			else if (e.type == SDL_KEYUP && e.key.keysym.sym == KEY_QUIT) 
 				break;
+			else if (e.type == SDL_MOUSEBUTTONDOWN 
+					&& e.button.button == SDL_BUTTON_LEFT) {
+				SDL_SetRelativeMouseMode(SDL_TRUE);
+				SDL_GetMouseState(&mx, &my);
+			} else if (e.type == SDL_MOUSEBUTTONUP
+					&& e.button.button == SDL_BUTTON_LEFT)
+				SDL_SetRelativeMouseMode(SDL_FALSE);
 		}
+		
+		if (SDL_GetRelativeMouseState(&mx, &my) & SDL_BUTTON(SDL_BUTTON_LEFT)) {
+			lat -= ((GLfloat) my / (GLfloat) height) * sens;
+			lon -= ((GLfloat) mx / (GLfloat) width) * sens;
+			campos.x = cos(lon) * sin(lat);
+			campos.y = sin(lon) * sin(lat);
+			campos.z = cos(lat);
+			look_at(campos, cen, up, view);
+			glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
+		}
+
 
 		glClearColor(0.0, 0.0, 0.0, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
