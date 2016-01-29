@@ -319,28 +319,6 @@ static int genbods (int n, body * bodies)
 }
 
 /*
- * Prints each value for each body in the system in the same format it takes as
- * input
- */
-static int print_system (FILE * stream, body * bodies, int bodies_length)
-{
-	int i;
-
-	fprintf(stream, "%f, %f\n", DIST_SCALE, TIME_SCALE);
-	for (i = 0; i < bodies_length; i++) {
-		fprintf(stream, "%f, ", bodies[i].pos.x);
-		fprintf(stream, "%f, ", bodies[i].pos.y);
-		fprintf(stream, "%f, ", bodies[i].pos.z);
-		fprintf(stream, "%f, ", bodies[i].vel.x);
-		fprintf(stream, "%f, ", bodies[i].vel.y);
-		fprintf(stream, "%f, ", bodies[i].vel.z);
-		fprintf(stream, "%ld;\n", bodies[i].mass);
-	}
-
-	return 0;
-}
-
-/*
  * Calculates the accelerations of bodies a and b and edits their velocities
  */
 static void calc_accels (body * a, body * b) 
@@ -509,8 +487,8 @@ static int rendering_loop (body * bodies, int bodies_length)
 	GLint uni_model = glGetUniformLocation(sp, "model");
 
 	int mx = 0, my = 0;
-	GLfloat lon = PI, lat = PI / 2;
-	GLfloat sens = 0.1;
+	GLfloat lon = PI, lat = PI / 2, r = 1.0;
+	GLfloat sens = 1.0;
 	GLfloat view[16];
 	vec3 campos;
 	campos.x = cos(lon) * sin(lat);
@@ -550,14 +528,22 @@ static int rendering_loop (body * bodies, int bodies_length)
 			} else if (e.type == SDL_MOUSEBUTTONUP
 					&& e.button.button == SDL_BUTTON_LEFT)
 				SDL_SetRelativeMouseMode(SDL_FALSE);
+			else if (e.type == SDL_MOUSEWHEEL) {
+				r -= e.wheel.y / 10.0;
+				campos.x = r * cos(lon) * sin(lat);
+				campos.y = r * sin(lon) * sin(lat);
+				campos.z = r * cos(lat);
+				look_at(campos, cen, up, view);
+				glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
+			}
 		}
 		
 		if (SDL_GetRelativeMouseState(&mx, &my) & SDL_BUTTON(SDL_BUTTON_LEFT)) {
 			lat -= ((GLfloat) my / (GLfloat) height) * sens;
 			lon -= ((GLfloat) mx / (GLfloat) width) * sens;
-			campos.x = cos(lon) * sin(lat);
-			campos.y = sin(lon) * sin(lat);
-			campos.z = cos(lat);
+			campos.x = r * cos(lon) * sin(lat);
+			campos.y = r * sin(lon) * sin(lat);
+			campos.z = r * cos(lat);
 			look_at(campos, cen, up, view);
 			glUniformMatrix4fv(uni_view, 1, GL_FALSE, view);
 		}
@@ -570,8 +556,8 @@ static int rendering_loop (body * bodies, int bodies_length)
 		t = SDL_GetPerformanceCounter();
 		tpf = (GLdouble) (t - tl) / (GLdouble) SDL_GetPerformanceFrequency();
 		
-		if (update_bodies(bodies, bodies_length, tpf)) break;
 		vec3 com = centre_of_mass(bodies, bodies_length);
+		update_bodies(bodies, bodies_length, tpf);
 		draw_bodies(bodies, bodies_length, attr_vert, uni_model);
 
 		SDL_GL_SwapWindow(window);
