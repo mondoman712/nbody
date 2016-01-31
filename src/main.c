@@ -31,6 +31,7 @@
 #include <getopt.h>
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
+#include <libguile.h>
 
 #define G 6.67408e-11L
 #define PI 3.141592653589
@@ -274,6 +275,49 @@ void perspective (GLfloat fovy, GLfloat asp, GLfloat znear, GLfloat zfar,
 	*(mat4 + 15) = 0;
 }
 
+/* 
+ * Reads obj file and deposits vertices into float array
+ */
+GLushort read_obj (const char * filename, GLfloat ** vertices, char ** mtl_loc)
+{
+	int i;
+	SCM vrts;
+
+	/* load scheme source file */
+	scm_c_primitive_load("src/f_obj.scm");
+
+	/* load scheme packages to use */
+	scm_c_use_module("ice-9 rdelim");
+	scm_c_use_module("srfi srfi-1");
+
+	/* load necessary scheme function */
+	SCM load_obj_sym = scm_c_lookup("load-obj");
+	SCM load_obj = scm_variable_ref(load_obj_sym);
+
+	/* call scheme function */
+	vrts = scm_call_1(load_obj, scm_from_locale_string(filename));
+
+	if (mtl_loc != NULL)
+		*mtl_loc = scm_to_locale_string(scm_list_ref(vrts, scm_from_int(1)));
+	vrts = scm_list_ref(vrts, scm_from_int(0));
+
+	/* Copy vertices from scm list into array */
+	*vertices = (GLfloat *) malloc((1 + scm_to_int(scm_length(vrts))) 
+			* sizeof(GLfloat));
+	if (*vertices == NULL) {
+		fprintf(stderr, "Failed to allocate memory for %s\n", filename);
+		return 1;
+	}
+
+	**vertices = (GLfloat) scm_to_double(scm_length(vrts));
+	for (i = 0; i < **vertices; i++)
+		*(*vertices + i + 1) =
+			(GLfloat) scm_to_double(scm_list_ref(vrts,
+						scm_from_int(i)));
+
+	return 0;
+}
+
 /*
  * Returns the centre of mass of the array of bodies as a vector
  */
@@ -390,30 +434,26 @@ static int draw_com (vec3 com, SDL_Renderer * renderer)
 	return 0;
 }
 
-static void draw_body (body b, GLuint attr_vert, GLuint uni_model)
+void draw_body (body b, GLuint attr_vert, GLuint uni_model, GLfloat * verts)
 {
-	GLdouble verts[] = {b.pos.x, b.pos.y, b.pos.z};
-	glBufferData(GL_ARRAY_BUFFER, 3 * sizeof(GLdouble), verts,
-			GL_STATIC_DRAW);
-
 	vec3 spos = {b.pos.x / 1024, b.pos.y / 768, b.pos.z / 1000};
 	GLfloat model[16];
 	translate(spos, model);
 	glUniformMatrix4fv(uni_model, 1, GL_FALSE, model);
 	
-	glVertexAttribPointer(attr_vert, 3, GL_DOUBLE, GL_FALSE, 0, 0);
+	glVertexAttribPointer(attr_vert, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glDrawArrays(GL_POINTS, 0, 1);
+	glDrawArrays(GL_POINTS, 0, *verts);
 }
 /*
  * Draws the bodies contained in the array of length bodies_length at *bodies
  */
 static void draw_bodies (body * bodies, int bodies_length, GLuint attr_vert,
-		GLuint uni_model)
+		GLuint uni_model, GLfloat * verts)
 {
 	int i;
 	for (i = 0; i < bodies_length; i++)
-		draw_body(bodies[i], attr_vert, uni_model);
+		draw_body(bodies[i], attr_vert, uni_model, verts);
 }
 
 /*
@@ -467,7 +507,19 @@ static int rendering_loop (body * bodies, int bodies_length)
 		return 1;
 	}
 
-	GLdouble verts[] = {0.0, 0.0, 0.0};
+	/*
+	GLfloat * verts = NULL;
+	read_obj("assets/models/sphere.obj", &verts, NULL);
+	*/
+	GLfloat verts[] = {
+		3,
+		-0.1, -0.1, 0.0,
+		0.1, -0.1, 0.0,
+		0.1, 0.0, 0.0
+	};
+
+	glBufferData(GL_ARRAY_BUFFER, *verts, verts + 1,
+			GL_STATIC_DRAW);
 	
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
@@ -558,7 +610,7 @@ static int rendering_loop (body * bodies, int bodies_length)
 		
 		vec3 com = centre_of_mass(bodies, bodies_length);
 		update_bodies(bodies, bodies_length, tpf);
-		draw_bodies(bodies, bodies_length, attr_vert, uni_model);
+		draw_bodies(bodies, bodies_length, attr_vert, uni_model, verts);
 
 		SDL_GL_SwapWindow(window);
 
@@ -673,6 +725,8 @@ static int parse_opts (int argc, char **argv)
 
 int main(int argc, char **argv)
 {
+	scm_init_guile();
+
 	if (parse_opts(argc, argv) == -1)
 		exit(EXIT_FAILURE);
 
