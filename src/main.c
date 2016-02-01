@@ -319,29 +319,6 @@ GLushort read_obj (const char * filename, GLfloat ** vertices, char ** mtl_loc)
 }
 
 /*
- * Returns the centre of mass of the array of bodies as a vector
- */
-static vec3 centre_of_mass (body * bodies, int bodies_length)
-{
-	vec3 ret = {0, 0, 0};
-	int i;
-	GLuint64 mtot = 0;
-
-	for (i = 0; i < bodies_length; i++) {
-		ret.x += (bodies[i].pos.x * bodies[i].mass);
-		ret.y += (bodies[i].pos.y * bodies[i].mass);
-		ret.z += (bodies[i].pos.z * bodies[i].mass);
-		mtot += bodies[i].mass;
-	}
-
-	ret.x /= mtot;
-	ret.y /= mtot;
-	ret.z /= mtot;
-
-	return ret;
-}
-
-/*
  * Fills array with n bodies of random position and velocity (and maybe mass)
  */
 static int genbods (int n, body * bodies)
@@ -415,25 +392,6 @@ static int update_bodies (body * bodies, int bodies_length, GLdouble t)
 	return 0;
 }
 
-/*
- * Draws the centre of mass point / centre point (when the centre flag is true)
- */
-static int draw_com (vec3 com, SDL_Renderer * renderer)
-{
-	if (centre_flag) {
-		com.x = width / 2;
-		com.y = height / 2;
-	} else {
-		com.x = (width / 2) + (com.x / DIST_SCALE);
-		com.y = (height / 2) - (com.y / DIST_SCALE);
-	}
-
-	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-	SDL_RenderDrawPoint(renderer, com.x, com.y);
-
-	return 0;
-}
-
 void draw_body (body b, GLuint attr_vert, GLuint uni_model, GLfloat * verts)
 {
 	vec3 spos = {b.pos.x / 1024, b.pos.y / 768, b.pos.z / 1000};
@@ -443,7 +401,7 @@ void draw_body (body b, GLuint attr_vert, GLuint uni_model, GLfloat * verts)
 	
 	glVertexAttribPointer(attr_vert, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glDrawArrays(GL_POINTS, 0, *verts);
+	glDrawArrays(GL_POINTS, 0, (GLsizei) *verts);
 }
 /*
  * Draws the bodies contained in the array of length bodies_length at *bodies
@@ -507,24 +465,25 @@ static int rendering_loop (body * bodies, int bodies_length)
 		return 1;
 	}
 
-	/*
 	GLfloat * verts = NULL;
 	read_obj("assets/models/sphere.obj", &verts, NULL);
-	*/
+	/*
 	GLfloat verts[] = {
-		3,
-		-0.1, -0.1, 0.0,
-		0.1, -0.1, 0.0,
+		2,
+		0.0, 0.0, 0.0,
 		0.1, 0.0, 0.0
 	};
+	*/
 
-	glBufferData(GL_ARRAY_BUFFER, *verts, verts + 1,
-			GL_STATIC_DRAW);
-	
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
 	GLuint vbo;
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, (int) *verts * 3 * sizeof(GLfloat),
+			verts + 1, GL_STATIC_DRAW);
 
 	GLuint vs = create_shader(GL_VERTEX_SHADER, "vs1");
 	GLuint fs = create_shader(GL_FRAGMENT_SHADER, "fs1");
@@ -556,10 +515,6 @@ static int rendering_loop (body * bodies, int bodies_length)
 	perspective(fov, width / height, 0.1, 100.0, proj);
 	GLint uni_proj = glGetUniformLocation(sp, "proj");
 	glUniformMatrix4fv(uni_proj, 1, GL_FALSE, proj);
-
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
 
 	GLuint attr_vert = glGetAttribLocation(sp, "vert");
 
@@ -608,7 +563,6 @@ static int rendering_loop (body * bodies, int bodies_length)
 		t = SDL_GetPerformanceCounter();
 		tpf = (GLdouble) (t - tl) / (GLdouble) SDL_GetPerformanceFrequency();
 		
-		vec3 com = centre_of_mass(bodies, bodies_length);
 		update_bodies(bodies, bodies_length, tpf);
 		draw_bodies(bodies, bodies_length, attr_vert, uni_model, verts);
 
