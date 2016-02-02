@@ -486,11 +486,13 @@ static int rendering_loop (body * bodies, int bodies_length)
 			verts + 1, GL_STATIC_DRAW);
 
 	GLuint vs = create_shader(GL_VERTEX_SHADER, "vs1");
+	GLuint gs = create_shader(GL_GEOMETRY_SHADER, "gs1");
 	GLuint fs = create_shader(GL_FRAGMENT_SHADER, "fs1");
 
 	GLuint sp = glCreateProgram();
 	glAttachShader(sp, vs);
 	glAttachShader(sp, fs);
+	glAttachShader(sp, gs);
 	glBindFragDataLocation(sp, 0, "out_colour");
 	glLinkProgram(sp);
 	glUseProgram(sp);
