@@ -549,6 +549,8 @@ static int rendering_loop (body * bodies, int bodies_length)
 		
 		if (SDL_GetRelativeMouseState(&mx, &my) & SDL_BUTTON(SDL_BUTTON_LEFT)) {
 			lat -= ((GLfloat) my / (GLfloat) height) * sens;
+			if (lat > PI) lat = PI;
+			else if (lat < 0) lat = 0;
 			lon -= ((GLfloat) mx / (GLfloat) width) * sens;
 			campos.x = r * cos(lon) * sin(lat);
 			campos.y = r * sin(lon) * sin(lat);
